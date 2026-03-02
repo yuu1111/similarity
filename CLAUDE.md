@@ -1,29 +1,27 @@
-## Project Goal
+## プロジェクト目標
 
-Calculate code similarity between functions and types across multiple programming languages.
+複数のプログラミング言語にわたる関数と型のコード類似性を計算する。
 
-## Project Structure
+## プロジェクト構成
 
-### Crates Organization Policy
+### クレート構成ポリシー
 
 - **crates/core (similarity-ts-core)**: 言語非依存のコア機能
   - AST比較アルゴリズム (APTED, TSED)
   - 共通パーサーインターフェース (`LanguageParser` trait)
   - CLI共通ユーティリティ (`cli_parallel`, `cli_output`, `cli_file_utils`)
-  
+
 - **crates/similarity-ts**: TypeScript/JavaScript専用CLI
   - oxc_parser を使用した高速パース
   - 型システムの類似性検出 (type_comparator, type_extractor)
   - JSX/TSX サポート
-  
+
 - **crates/similarity-py**: Python専用CLI
   - tree-sitter-python を使用
   - Python固有の構文サポート
   - クラス・メソッドの検出
-  
-- **__deprecated/**: TypeScriptプロトタイプ実装（参考用のみ）
 
-### Multi-Language Support Policy
+### 多言語サポートポリシー
 
 1. **言語ごとに独立したCLIパッケージを提供**
    - `similarity-ts`: TypeScript/JavaScript専用
@@ -41,58 +39,57 @@ Calculate code similarity between functions and types across multiple programmin
    - ファイル操作ユーティリティ
    - 将来のクロス言語比較の基盤
 
-## Development Stack
+## 開発スタック
 
-### Rust (Main)
+### Rust (メイン)
 - cargo (workspace構成)
-- clap (CLI framework)
-- oxc_parser (TypeScript/JavaScript parser - 高速)
+- clap (CLIフレームワーク)
+- oxc_parser (TypeScript/JavaScriptパーサー - 高速)
 - tree-sitter (Python, その他の言語 - 汎用的だが約10倍遅い)
 - rayon (並列処理)
 
-## Coding Rules
+## コーディングルール
 
 ### Rust
-- Follow standard Rust conventions
-- Use clippy for linting
-- Run tests with `cargo test`
-- push する前には .github/workflows/rust.yaml 相当の確認のテストを実行して確認
+- 標準的なRustの規約に従う
+- lintにはclippyを使用する
+- テストは `cargo test` で実行する
+- pushする前には .github/workflows/rust.yaml 相当の確認のテストを実行して確認
 
-## Directory Patterns
+## ディレクトリ構成
 
 ```
-crates/              # Rust implementation (main)
-  core/              # Language-agnostic core logic
+crates/              # Rust実装 (メイン)
+  core/              # 言語非依存のコアロジック
   similarity-ts/     # TypeScript/JavaScript CLI
   similarity-py/     # Python CLI
-examples/            # Example files
-  mixed_language_project/  # Multi-language examples
-__deprecated/        # Deprecated TypeScript prototype
+examples/            # サンプルファイル
+  mixed_language_project/  # 多言語サンプル
 ```
 
-## Features
+## 機能
 
-### Common Features (All Languages)
-- Function similarity detection using AST-based comparison
-- Configurable similarity thresholds
-- Cross-file analysis support
-- VSCode-compatible output format
-- Parallel processing for performance
+### 共通機能 (全言語)
+- ASTベースの比較による関数類似性検出
+- 類似度閾値の設定
+- クロスファイル分析のサポート
+- VSCode互換の出力形式
+- 並列処理によるパフォーマンス向上
 
-### TypeScript/JavaScript Specific
-- Type similarity detection (interfaces, type aliases, type literals)
-- Class similarity detection (properties, methods, inheritance)
-- JSX/TSX support
-- ES6+ syntax support (arrow functions, classes, etc.)
-- Fast parsing with oxc_parser
+### TypeScript/JavaScript固有
+- 型の類似性検出 (インターフェース、型エイリアス、型リテラル)
+- クラスの類似性検出 (プロパティ、メソッド、継承)
+- JSX/TSXサポート
+- ES6+構文サポート (アロー関数、クラスなど)
+- oxc_parserによる高速パース
 
-### Python Specific
-- Class and method detection
-- Decorator support
-- Python 3.x syntax support
-- Indentation-based structure analysis
+### Python固有
+- クラスとメソッドの検出
+- デコレータサポート
+- Python 3.x構文サポート
+- インデントベースの構造分析
 
-## Future Language Expansion
+## 将来の言語拡張
 
 新しい言語を追加する場合:
 
@@ -101,7 +98,7 @@ __deprecated/        # Deprecated TypeScript prototype
 3. 言語固有の機能を実装
 4. 統合テストを追加
 
-## Important Implementation Notes
+## 実装上の重要な注意事項
 
 ### 類似度計算には必ず calculate_tsed を使用する
 
