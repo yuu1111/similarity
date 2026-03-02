@@ -19,7 +19,7 @@ First release of similarity-ts (formerly ts-similarity) - a high-performance Typ
 ### Developer Experience
 - **Zero Configuration**: Works out of the box with sensible defaults
 - **VSCode-compatible Output**: Click file paths to jump directly to code
-- **Flexible Filtering**: 
+- **Flexible Filtering**:
   - `--min-tokens`: Filter by AST node count (recommended: 20-30)
   - `--min-lines`: Filter by line count
   - `--threshold`: Configurable similarity threshold (0.0-1.0)
