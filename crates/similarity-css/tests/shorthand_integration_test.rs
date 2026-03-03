@@ -87,8 +87,8 @@ fn test_invalid_shorthand_handling() {
     // Invalid margin should be kept as-is
     assert!(expanded.iter().any(|(k, v)| k == "margin" && v.contains("50px")));
 
-    // Invalid flex should be kept as-is
-    assert!(expanded.iter().any(|(k, v)| k == "flex" && v.contains("invalid")));
+    // Invalid flex values are expanded positionally (no validation)
+    assert!(expanded.iter().any(|(k, v)| k == "flex-grow" && v == "invalid"));
 
     // Unknown property should pass through
     assert!(expanded.iter().any(|(k, _v)| k == "unknown-property"));

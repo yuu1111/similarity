@@ -130,21 +130,19 @@ type UserData = {
     )
     .unwrap();
 
-    // Run the CLI for types
+    // Run the CLI for types only (types are enabled by default)
     let mut cmd = Command::cargo_bin("similarity-ts").unwrap();
     cmd.arg(dir.path())
         .arg("--no-functions")
-        .arg("--experimental-types")
         .assert()
         .success()
         .stdout(predicate::str::contains("User"))
         .stdout(predicate::str::contains("Person"))
-        .stdout(predicate::str::contains("UserData"))
-        .stdout(predicate::str::contains("similar-type"));
+        .stdout(predicate::str::contains("UserData"));
 }
 
 #[test]
-fn test_default_command_runs_functions_only() {
+fn test_default_command_runs_functions_and_types() {
     let dir = tempdir().unwrap();
     let test_file = dir.path().join("test.ts");
 
@@ -161,7 +159,7 @@ export function add(a: number, b: number): number {
 }
 
 export function sum(x: number, y: number): number {
-    // Sum two numbers together  
+    // Sum two numbers together
     const result = x + y;
     // Return the result
     return result;
@@ -181,7 +179,7 @@ interface IPerson {
     )
     .unwrap();
 
-    // Run default (functions only)
+    // Run default (both functions and types are enabled by default)
     let mut cmd = Command::cargo_bin("similarity-ts").unwrap();
     cmd.arg(dir.path())
         .arg("--min-lines")
@@ -189,9 +187,17 @@ interface IPerson {
         .assert()
         .success()
         .stdout(predicate::str::contains("Function Similarity"))
-        .stdout(predicate::str::contains("Checking 1 files for duplicates"))
-        // Should NOT contain type analysis
-        .stdout(predicate::str::contains("Type Similarity").not())
+        .stdout(predicate::str::contains("Checking 1 files for duplicates"));
+
+    // Run with --no-types to check functions only
+    let mut cmd = Command::cargo_bin("similarity-ts").unwrap();
+    cmd.arg(dir.path())
+        .arg("--min-lines")
+        .arg("3")
+        .arg("--no-types")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Function Similarity"))
         .stdout(predicate::str::contains("IUser").not())
         .stdout(predicate::str::contains("IPerson").not());
 }

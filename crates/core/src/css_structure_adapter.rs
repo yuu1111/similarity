@@ -24,9 +24,9 @@ impl From<CssStructDef> for Structure {
         } else {
             StructureKind::CssRule
         };
-        
+
         let mut members = Vec::new();
-        
+
         // CSSプロパティをメンバーとして追加
         for (property, value) in css_rule.declarations {
             members.push(StructureMember {
@@ -81,7 +81,12 @@ impl From<CssStructDef> for Structure {
 /// CSS値をカテゴライズ（型として扱う）
 fn categorize_css_value(value: &str) -> String {
     let value = value.trim();
-    
+
+    // Compound values (multiple space-separated values like "10px 20px")
+    if value.contains(' ') && !value.starts_with("rgb") && !value.starts_with("hsl") && !value.starts_with("url(") {
+        return "value".to_string();
+    }
+
     // Color values
     if value.starts_with('#') || 
        value.starts_with("rgb") || 
@@ -200,7 +205,12 @@ impl CssStructureComparator {
     pub fn compare_rules(&mut self, rule1: &CssStructDef, rule2: &CssStructDef) -> StructureComparisonResult {
         let struct1 = Structure::from(rule1.clone());
         let struct2 = Structure::from(rule2.clone());
-        self.comparator.compare(&struct1, &struct2)
+        let mut result = self.comparator.compare(&struct1, &struct2);
+
+        // CSSプロパティ名は固定語彙のため、完全一致のマッチのみ保持
+        result.member_matches.retain(|m| m.member1 == m.member2);
+
+        result
     }
     
     /// セレクタの正規化（比較用）

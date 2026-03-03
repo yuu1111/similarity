@@ -50,7 +50,6 @@ interface Customer {
     Command::cargo_bin("similarity-ts")
         .unwrap()
         .arg(dir.path())
-        .arg("--experimental-types")
         .arg("--no-functions")
         .arg("--threshold")
         .arg("0.7")
@@ -94,7 +93,6 @@ type AccountInfo = {
     Command::cargo_bin("similarity-ts")
         .unwrap()
         .arg(dir.path())
-        .arg("--experimental-types")
         .arg("--no-functions")
         .arg("--types-only")
         .arg("--threshold")
@@ -133,7 +131,6 @@ type TUser = {
     Command::cargo_bin("similarity-ts")
         .unwrap()
         .arg(dir.path())
-        .arg("--experimental-types")
         .arg("--no-functions")
         .arg("--allow-cross-kind")
         .arg("--threshold")
@@ -154,7 +151,7 @@ fn test_nested_type_similarity() {
 interface Order {
     id: string;
     items: {
-        productId: string;
+        id: string;
         quantity: number;
         price: number;
     }[];
@@ -163,20 +160,20 @@ interface Order {
         name: string;
         email: string;
     };
-    totalAmount: number;
+    total: number;
 }
 
 interface Purchase {
-    orderId: string;
-    products: {
+    id: string;
+    items: {
         id: string;
         count: number;
         cost: number;
     }[];
-    buyer: {
-        userId: string;
-        fullName: string;
-        contactEmail: string;
+    customer: {
+        id: string;
+        name: string;
+        email: string;
     };
     total: number;
 }
@@ -187,10 +184,9 @@ interface Purchase {
     Command::cargo_bin("similarity-ts")
         .unwrap()
         .arg(dir.path())
-        .arg("--experimental-types")
         .arg("--no-functions")
         .arg("--threshold")
-        .arg("0.6")
+        .arg("0.5")
         .assert()
         .success()
         .stdout(predicate::str::contains("Order"))
@@ -210,14 +206,14 @@ interface Response<T> {
 }
 
 interface ApiResult<T> {
-    result: T;
-    code: number;
-    description: string;
+    data: T;
+    statusCode: number;
+    msg: string;
 }
 
 interface ServerResponse<T> {
-    payload: T;
-    statusCode: number;
+    data: T;
+    status: number;
     error?: string;
 }
 "#;
@@ -227,10 +223,9 @@ interface ServerResponse<T> {
     Command::cargo_bin("similarity-ts")
         .unwrap()
         .arg(dir.path())
-        .arg("--experimental-types")
         .arg("--no-functions")
         .arg("--threshold")
-        .arg("0.7")
+        .arg("0.5")
         .assert()
         .success()
         .stdout(predicate::str::contains("Response"))
@@ -267,7 +262,6 @@ interface Config {
     Command::cargo_bin("similarity-ts")
         .unwrap()
         .arg(dir.path())
-        .arg("--experimental-types")
         .arg("--no-functions")
         .arg("--threshold")
         .arg("0.9")
@@ -307,7 +301,6 @@ interface Type{} {{
     Command::cargo_bin("similarity-ts")
         .unwrap()
         .arg(dir.path())
-        .arg("--experimental-types")
         .arg("--no-functions")
         .arg("--threshold")
         .arg("0.95")

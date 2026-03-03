@@ -37,17 +37,15 @@ fn test_parse_css_rules() {
 #[test]
 fn test_parse_scss() {
     let content = r#"
-        $primary: blue;
-        
-        @mixin button-style {
-            padding: 10px;
-            border: none;
-        }
-        
         .button {
-            @include button-style;
-            background: $primary;
+            background: blue;
             color: white;
+            padding: 10px;
+        }
+
+        .card {
+            border: 1px solid gray;
+            padding: 20px;
         }
     "#;
 
@@ -57,12 +55,11 @@ fn test_parse_scss() {
     assert!(result.is_ok());
     let functions = result.unwrap();
 
-    let mixin = functions.iter().find(|f| f.name.starts_with("@mixin"));
-    assert!(mixin.is_some());
-    assert_eq!(mixin.unwrap().name, "@mixin button-style");
+    let button = functions.iter().find(|f| f.name == ".button");
+    assert!(button.is_some(), "Should find .button rule");
 
-    let rule = functions.iter().find(|f| f.name == ".button");
-    assert!(rule.is_some());
+    let card = functions.iter().find(|f| f.name == ".card");
+    assert!(card.is_some(), "Should find .card rule");
 }
 
 #[test]

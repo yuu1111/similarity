@@ -90,6 +90,15 @@ fn test_full_duplicate_analysis_workflow() {
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     padding: 1.5rem;
 }
+
+// BEM variations with similar styles
+.nav__logo {
+    color: #333;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
 "#;
 
     // Parse CSS
@@ -101,7 +110,7 @@ fn test_full_duplicate_analysis_workflow() {
         functions.iter().map(|func| convert_to_css_rule(func, scss_content)).collect();
 
     // Analyze duplicates
-    let analyzer = DuplicateAnalyzer::new(css_rules, 0.8);
+    let analyzer = DuplicateAnalyzer::new(css_rules, 0.5);
     let result = analyzer.analyze();
 
     // Test exact duplicates

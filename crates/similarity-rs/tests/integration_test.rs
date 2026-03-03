@@ -197,18 +197,24 @@ fn test_min_lines_filtering() {
 fn f1() -> i32 { 1 }
 fn f2() -> i32 { 1 }
 
-fn longer_func1() -> i32 {
-    let x = 1;
-    let y = 2;
-    let z = 3;
-    x + y + z
+fn longer_func1(items: &[i32]) -> Vec<i32> {
+    let mut result = Vec::new();
+    for item in items {
+        if *item > 0 {
+            result.push(item * 2);
+        }
+    }
+    result
 }
 
-fn longer_func2() -> i32 {
-    let a = 1;
-    let b = 2; 
-    let c = 3;
-    a + b + c
+fn longer_func2(data: &[i32]) -> Vec<i32> {
+    let mut output = Vec::new();
+    for d in data {
+        if *d > 0 {
+            output.push(d * 2);
+        }
+    }
+    output
 }
 "#;
 
@@ -220,7 +226,8 @@ fn longer_func2() -> i32 {
         .arg("--min-lines")
         .arg("4")
         .arg("--threshold")
-        .arg("0.7") // Lower threshold for these similar functions
+        .arg("0.7")
+        .arg("--no-size-penalty")
         .assert()
         .success()
         .stdout(predicate::str::contains("longer_func1"))

@@ -92,12 +92,15 @@ pub fn calculate_specificity(selector: &str) -> Specificity {
 fn normalize_selector(selector: &str) -> String {
     selector
         .trim()
-        // Remove content inside :not(), :is(), :where() etc
-        .replace(":not(", ":not")
-        .replace(":is(", ":is")
-        .replace(":where(", ":where")
-        .replace(":has(", ":has")
-        // Remove closing parentheses
+        // Remove :not(), :is(), :has() wrappers (keep their arguments)
+        // Per CSS spec, :not()/:is()/:has() themselves contribute 0 specificity
+        .replace(":not(", "(")
+        .replace(":is(", "(")
+        .replace(":has(", "(")
+        // :where() and its arguments contribute 0 specificity
+        .replace(":where(", "(")
+        // Remove parentheses
+        .replace("(", "")
         .replace(")", "")
         // Normalize whitespace around combinators
         .replace(">", " > ")

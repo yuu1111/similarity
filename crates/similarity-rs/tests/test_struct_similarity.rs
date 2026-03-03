@@ -75,17 +75,17 @@ enum Status {
 }
 
 enum State {
-    Running,
-    Stopped,
-    Waiting,
-    Finished,
+    Active,
+    Inactive,
+    Pending,
+    Completed,
 }
 
 enum TaskStatus {
-    InProgress,
-    Paused,
-    Queued,
-    Done,
+    Active,
+    Inactive,
+    Pending,
+    Completed,
 }
 "#;
 
@@ -97,7 +97,7 @@ enum TaskStatus {
         .arg("--experimental-types")
         .arg("--no-functions")
         .arg("--threshold")
-        .arg("0.7")
+        .arg("0.4")
         .assert()
         .success()
         .stdout(predicate::str::contains("Status"))

@@ -144,7 +144,7 @@ fn extract_selectors(node: &Node, source: &str) -> Vec<String> {
     {
         println!("  Looking for selectors in node: {}", node.kind());
         for i in 0..node.child_count() {
-            if let Some(child) = node.child(i) {
+            if let Some(child) = node.child(i as u32) {
                 println!(
                     "    Child {}: {} - {}",
                     i,
@@ -169,7 +169,7 @@ fn extract_selectors(node: &Node, source: &str) -> Vec<String> {
     } else {
         // For SCSS, selectors might be direct children before the block
         for i in 0..node.child_count() {
-            if let Some(child) = node.child(i) {
+            if let Some(child) = node.child(i as u32) {
                 if child.kind() == "{" {
                     break; // Stop when we reach the block
                 }
@@ -202,7 +202,7 @@ fn extract_declarations(node: &Node, source: &str) -> Vec<(String, String)> {
             let mut found_colon = false;
 
             for i in 0..node.child_count() {
-                if let Some(child) = node.child(i) {
+                if let Some(child) = node.child(i as u32) {
                     match child.kind() {
                         "property_name" => {
                             property = get_node_text(&child, source).trim().to_string();
@@ -230,7 +230,7 @@ fn extract_declarations(node: &Node, source: &str) -> Vec<(String, String)> {
         } else {
             // Recursively search children
             for i in 0..node.child_count() {
-                if let Some(child) = node.child(i) {
+                if let Some(child) = node.child(i as u32) {
                     // Skip nested rule_sets to avoid extracting from nested rules
                     if child.kind() != "rule_set" && child.kind() != "ruleset" {
                         find_declarations(&child, source, declarations);

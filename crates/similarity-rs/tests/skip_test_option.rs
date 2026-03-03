@@ -79,28 +79,46 @@ fn test_skip_test_with_test_attribute() {
         r#"
 #[test]
 fn should_be_skipped() {
-    let x = 1;
-    let y = 2;
-    assert_eq!(x + y, 3);
+    let items = vec![1, 2, 3];
+    let mut result = Vec::new();
+    for item in &items {
+        if *item > 0 {
+            result.push(item * 2);
+        }
+    }
+    assert_eq!(result.len(), 3);
 }
 
 #[test]
 fn also_should_be_skipped() {
-    let x = 1;
-    let y = 2;
-    assert_eq!(x + y, 3);
+    let items = vec![1, 2, 3];
+    let mut result = Vec::new();
+    for item in &items {
+        if *item > 0 {
+            result.push(item * 2);
+        }
+    }
+    assert_eq!(result.len(), 3);
 }
 
-fn normal_function() {
-    let x = 1;
-    let y = 2;
-    println!("{}", x + y);
+fn normal_function(items: &[i32]) -> Vec<i32> {
+    let mut result = Vec::new();
+    for item in items {
+        if *item > 0 {
+            result.push(item * 2);
+        }
+    }
+    result
 }
 
-fn another_normal_function() {
-    let x = 1;
-    let y = 2;
-    println!("{}", x + y);
+fn another_normal_function(data: &[i32]) -> Vec<i32> {
+    let mut output = Vec::new();
+    for d in data {
+        if *d > 0 {
+            output.push(d * 2);
+        }
+    }
+    output
 }
 "#,
     )
@@ -108,7 +126,7 @@ fn another_normal_function() {
 
     // Run with --skip-test
     let mut cmd = Command::cargo_bin("similarity-rs").unwrap();
-    cmd.arg(dir.path()).arg("--skip-test");
+    cmd.arg(dir.path()).arg("--skip-test").arg("--threshold").arg("0.8");
 
     let output = cmd.assert().success();
     let stdout = String::from_utf8_lossy(&output.get_output().stdout);

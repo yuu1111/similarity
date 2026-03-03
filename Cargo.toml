@@ -13,11 +13,11 @@ members = [
 resolver = "2"
 
 [workspace.dependencies]
-oxc_allocator = "0.73.0"
-oxc_ast = "0.73.0"
-oxc_parser = "0.73.0"
-oxc_span = "0.73.0"
-tree-sitter = "0.24"
+oxc_allocator = "0.116.0"
+oxc_ast = "0.116.0"
+oxc_parser = "0.116.0"
+oxc_span = "0.116.0"
+tree-sitter = "0.26"
 tree-sitter-c = "0.23"
 tree-sitter-c-sharp = "0.23"
 tree-sitter-cpp = "0.23"
@@ -30,3 +30,6 @@ tree-sitter-python = "0.23"
 tree-sitter-ruby = "0.23"
 tree-sitter-rust = "0.23"
 tree-sitter-typescript = "0.23"
+
+[patch.crates-io]
+tree-sitter-scss = { git = "https://github.com/tree-sitter-grammars/tree-sitter-scss.git", rev = "bca847c1410f7dd97e13fbe7838b3c2c203fb473" }

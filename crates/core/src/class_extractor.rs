@@ -239,14 +239,13 @@ impl ClassExtractor {
             .items
             .iter()
             .map(|param| {
-                let name = match &param.pattern.kind {
-                    oxc_ast::ast::BindingPatternKind::BindingIdentifier(ident) => {
+                let name = match &param.pattern {
+                    oxc_ast::ast::BindingPattern::BindingIdentifier(ident) => {
                         ident.name.as_str()
                     }
                     _ => "param",
                 };
                 let type_str = param
-                    .pattern
                     .type_annotation
                     .as_ref()
                     .map(|ta| self.extract_type_string(ta))
@@ -338,14 +337,13 @@ impl ClassExtractor {
                                 .items
                                 .iter()
                                 .map(|param| {
-                                    let param_name = match &param.pattern.kind {
-                                        oxc_ast::ast::BindingPatternKind::BindingIdentifier(
+                                    let param_name = match &param.pattern {
+                                        oxc_ast::ast::BindingPattern::BindingIdentifier(
                                             ident,
                                         ) => ident.name.as_str(),
                                         _ => "param",
                                     };
                                     let type_str = param
-                                        .pattern
                                         .type_annotation
                                         .as_ref()
                                         .map(|ta| self.extract_type_string(ta))

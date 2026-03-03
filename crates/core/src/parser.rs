@@ -1,6 +1,6 @@
 use oxc_allocator::Allocator;
 use oxc_ast::ast::{
-    BindingPatternKind, BlockStatement, ClassElement, Expression, FormalParameter, FunctionBody,
+    BindingPattern, BlockStatement, ClassElement, Expression, FormalParameter, FunctionBody,
     Program, PropertyKey, Statement, VariableDeclarator,
 };
 use oxc_parser::Parser;
@@ -271,8 +271,8 @@ fn formal_parameter_to_tree_node(
     param: &FormalParameter,
     id_counter: &mut usize,
 ) -> Option<Rc<TreeNode>> {
-    let label = match &param.pattern.kind {
-        BindingPatternKind::BindingIdentifier(ident) => ident.name.as_str().to_string(),
+    let label = match &param.pattern {
+        BindingPattern::BindingIdentifier(ident) => ident.name.as_str().to_string(),
         _ => "Parameter".to_string(),
     };
     let node = TreeNode::new(label, "Parameter".to_string(), *id_counter);
@@ -315,8 +315,8 @@ fn variable_declarator_to_tree_node(
     decl: &VariableDeclarator,
     id_counter: &mut usize,
 ) -> Option<Rc<TreeNode>> {
-    let label = match &decl.id.kind {
-        BindingPatternKind::BindingIdentifier(ident) => ident.name.as_str().to_string(),
+    let label = match &decl.id {
+        BindingPattern::BindingIdentifier(ident) => ident.name.as_str().to_string(),
         _ => "Variable".to_string(),
     };
     let mut node = TreeNode::new(label, "VariableDeclarator".to_string(), *id_counter);

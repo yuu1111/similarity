@@ -30,41 +30,77 @@ pub fn expand_shorthand_properties(declarations: &[(String, String)]) -> Vec<(St
     expanded
 }
 
+/// Split CSS value by whitespace while respecting parentheses
+/// e.g. "calc(100% - 20px)" stays as one part, "10px 20px" splits into two
+fn split_css_value_parts(value: &str) -> Vec<String> {
+    let mut parts = Vec::new();
+    let mut current = String::new();
+    let mut depth = 0;
+
+    for ch in value.chars() {
+        match ch {
+            '(' => {
+                depth += 1;
+                current.push(ch);
+            }
+            ')' => {
+                if depth > 0 {
+                    depth -= 1;
+                }
+                current.push(ch);
+            }
+            c if c.is_whitespace() && depth == 0 => {
+                if !current.is_empty() {
+                    parts.push(current.clone());
+                    current.clear();
+                }
+            }
+            _ => {
+                current.push(ch);
+            }
+        }
+    }
+
+    if !current.is_empty() {
+        parts.push(current);
+    }
+
+    parts
+}
+
 /// Expand margin/padding shorthand (1-4 values)
 fn expand_box_model_shorthand(expanded: &mut Vec<(String, String)>, prefix: &str, value: &str) {
-    let parts: Vec<&str> = value.split_whitespace().collect();
+    let parts = split_css_value_parts(value);
 
     match parts.len() {
         1 => {
             // All sides same value
-            let val = parts[0];
-            expanded.push((format!("{prefix}-top"), val.to_string()));
-            expanded.push((format!("{prefix}-right"), val.to_string()));
-            expanded.push((format!("{prefix}-bottom"), val.to_string()));
-            expanded.push((format!("{prefix}-left"), val.to_string()));
+            let val = &parts[0];
+            expanded.push((format!("{prefix}-top"), val.clone()));
+            expanded.push((format!("{prefix}-right"), val.clone()));
+            expanded.push((format!("{prefix}-bottom"), val.clone()));
+            expanded.push((format!("{prefix}-left"), val.clone()));
         }
         2 => {
             // vertical | horizontal
-            let (vertical, horizontal) = (parts[0], parts[1]);
-            expanded.push((format!("{prefix}-top"), vertical.to_string()));
-            expanded.push((format!("{prefix}-right"), horizontal.to_string()));
-            expanded.push((format!("{prefix}-bottom"), vertical.to_string()));
-            expanded.push((format!("{prefix}-left"), horizontal.to_string()));
+            expanded.push((format!("{prefix}-top"), parts[0].clone()));
+            expanded.push((format!("{prefix}-right"), parts[1].clone()));
+            expanded.push((format!("{prefix}-bottom"), parts[0].clone()));
+            expanded.push((format!("{prefix}-left"), parts[1].clone()));
         }
         3 => {
             // top | horizontal | bottom
-            let (top, horizontal, bottom) = (parts[0], parts[1], parts[2]);
-            expanded.push((format!("{prefix}-top"), top.to_string()));
-            expanded.push((format!("{prefix}-right"), horizontal.to_string()));
-            expanded.push((format!("{prefix}-bottom"), bottom.to_string()));
-            expanded.push((format!("{prefix}-left"), horizontal.to_string()));
+            expanded.push((format!("{prefix}-top"), parts[0].clone()));
+            expanded.push((format!("{prefix}-right"), parts[1].clone()));
+            expanded.push((format!("{prefix}-bottom"), parts[2].clone()));
+            expanded.push((format!("{prefix}-left"), parts[1].clone()));
         }
         4 => {
             // top | right | bottom | left
-            expanded.push((format!("{prefix}-top"), parts[0].to_string()));
-            expanded.push((format!("{prefix}-right"), parts[1].to_string()));
-            expanded.push((format!("{prefix}-bottom"), parts[2].to_string()));
-            expanded.push((format!("{prefix}-left"), parts[3].to_string()));
+            expanded.push((format!("{prefix}-top"), parts[0].clone()));
+            expanded.push((format!("{prefix}-right"), parts[1].clone()));
+            expanded.push((format!("{prefix}-bottom"), parts[2].clone()));
+            expanded.push((format!("{prefix}-left"), parts[3].clone()));
         }
         _ => {
             // Invalid, keep original
@@ -146,7 +182,14 @@ fn expand_background_shorthand(expanded: &mut Vec<(String, String)>, value: &str
         || value.contains("linear-gradient")
         || value.contains("radial-gradient")
     {
-        expanded.push(("background-image".to_string(), value.to_string()));
+        let parts = split_css_value_parts(value);
+        if parts.len() == 1 {
+            // Single image/gradient value
+            expanded.push(("background-image".to_string(), value.to_string()));
+        } else {
+            // Complex multi-part background (image + position/size/repeat/etc.)
+            expanded.push(("background".to_string(), value.to_string()));
+        }
     } else if is_color_value(value) {
         expanded.push(("background-color".to_string(), value.to_string()));
     } else {
@@ -165,6 +208,11 @@ fn expand_font_shorthand(expanded: &mut Vec<(String, String)>, value: &str) {
         if let Some(size_pos) = parts.iter().position(|p| {
             p.contains("px") || p.contains("em") || p.contains("rem") || p.contains("%")
         }) {
+            // If size part contains '/' (font-size/line-height), keep as-is
+            if parts[size_pos].contains('/') {
+                expanded.push(("font".to_string(), value.to_string()));
+                return;
+            }
             if size_pos < parts.len() - 1 {
                 expanded.push(("font-size".to_string(), parts[size_pos].to_string()));
                 let family = parts[(size_pos + 1)..].join(" ");
