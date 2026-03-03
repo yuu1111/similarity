@@ -233,6 +233,12 @@ pub struct RustStructureComparator {
     pub comparator: StructureComparator,
 }
 
+impl Default for RustStructureComparator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl RustStructureComparator {
     pub fn new() -> Self {
         let options = ComparisonOptions {

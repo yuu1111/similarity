@@ -22,7 +22,7 @@ impl From<TypeDefinition> for Structure {
             },
             members: type_def.properties
                 .into_iter()
-                .map(|prop| property_to_member(prop))
+                .map(property_to_member)
                 .collect(),
             metadata: StructureMetadata {
                 location: SourceLocation {
@@ -49,7 +49,7 @@ impl From<TypeLiteralDefinition> for Structure {
             },
             members: literal.properties
                 .into_iter()
-                .map(|prop| property_to_member(prop))
+                .map(property_to_member)
                 .collect(),
             metadata: StructureMetadata {
                 location: SourceLocation {
@@ -188,6 +188,12 @@ pub struct TypeScriptStructureComparator {
     pub comparator: StructureComparator,
 }
 
+impl Default for TypeScriptStructureComparator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TypeScriptStructureComparator {
     pub fn new() -> Self {
         let options = ComparisonOptions {
@@ -248,6 +254,12 @@ pub struct BatchComparator {
     fingerprint_cache: std::collections::HashMap<String, Vec<Structure>>,
 }
 
+impl Default for BatchComparator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl BatchComparator {
     pub fn new() -> Self {
         Self {
@@ -262,7 +274,7 @@ impl BatchComparator {
             let fingerprint = self.comparator.comparator.generate_fingerprint(&structure);
             self.fingerprint_cache
                 .entry(fingerprint)
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push(structure);
         }
     }

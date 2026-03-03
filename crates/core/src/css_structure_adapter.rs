@@ -179,6 +179,12 @@ pub struct CssStructureComparator {
     pub comparator: StructureComparator,
 }
 
+impl Default for CssStructureComparator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CssStructureComparator {
     pub fn new() -> Self {
         let options = ComparisonOptions {
@@ -352,6 +358,12 @@ pub struct CssBatchComparator {
     fingerprint_cache: HashMap<String, Vec<Structure>>,
 }
 
+impl Default for CssBatchComparator {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CssBatchComparator {
     pub fn new() -> Self {
         Self {
@@ -367,7 +379,7 @@ impl CssBatchComparator {
             let fingerprint = self.comparator.comparator.generate_fingerprint(&structure);
             self.fingerprint_cache
                 .entry(fingerprint)
-                .or_insert_with(Vec::new)
+                .or_default()
                 .push(structure);
         }
     }

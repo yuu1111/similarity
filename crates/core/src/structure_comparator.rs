@@ -423,7 +423,7 @@ fn size_category_distance(cat1: &str, cat2: &str) -> usize {
     let categories = ["empty", "single", "small", "medium", "large", "huge"];
     let pos1 = categories.iter().position(|&c| c == cat1).unwrap_or(0);
     let pos2 = categories.iter().position(|&c| c == cat2).unwrap_or(0);
-    if pos1 > pos2 { pos1 - pos2 } else { pos2 - pos1 }
+    pos1.abs_diff(pos2)
 }
 
 /// 型を正規化

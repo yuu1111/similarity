@@ -35,7 +35,7 @@ fn group_types_by_fingerprint(types: &[ExtractedType]) -> HashMap<String, Vec<us
 
     for (index, extracted_type) in types.iter().enumerate() {
         let fingerprint = generate_type_fingerprint(&extracted_type.type_def);
-        groups.entry(fingerprint).or_insert_with(Vec::new).push(index);
+        groups.entry(fingerprint).or_default().push(index);
     }
 
     groups
@@ -299,7 +299,7 @@ pub fn check_types(
             RustParser::new().map_err(|e| anyhow::anyhow!("Failed to create parser: {}", e))?;
 
         // First, compare types within the same fingerprint group
-        for (_fingerprint, indices) in &fingerprint_groups {
+        for indices in fingerprint_groups.values() {
             if indices.len() < 2 {
                 continue;
             }

@@ -695,9 +695,9 @@ fn check_types(
                 );
 
                 if print {
-                    show_type_literal_details(&literal1);
-                    show_type_literal_details(&literal2);
-                    show_comparison_details(&result);
+                    show_type_literal_details(literal1);
+                    show_type_literal_details(literal2);
+                    show_comparison_details(result);
                 }
             }
 
@@ -1172,7 +1172,7 @@ fn check_classes(
             };
             println!("  - {} ({})", class.name, reason);
         }
-        println!("");
+        println!();
     }
 
     // Find similar classes across all files
