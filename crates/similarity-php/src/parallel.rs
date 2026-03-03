@@ -4,7 +4,7 @@ use rayon::prelude::*;
 use similarity_core::{
     cli_parallel::{FileData, SimilarityResult},
     language_parser::{GenericFunctionDef, LanguageParser},
-    tsed::{calculate_tsed, TSEDOptions},
+    tsed::{TSEDOptions, calculate_tsed},
 };
 use std::fs;
 use std::path::PathBuf;

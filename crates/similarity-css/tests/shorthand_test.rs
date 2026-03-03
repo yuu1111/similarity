@@ -1,5 +1,5 @@
 use similarity_core::tree::TreeNode;
-use similarity_css::{compare_css_rules, CssRule};
+use similarity_css::{CssRule, compare_css_rules};
 use std::rc::Rc;
 
 fn create_test_rule_with_declarations(selector: &str, declarations: Vec<(&str, &str)>) -> CssRule {

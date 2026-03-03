@@ -1,4 +1,4 @@
-use crate::apted::{compute_edit_distance, APTEDOptions};
+use crate::apted::{APTEDOptions, compute_edit_distance};
 use crate::tree::TreeNode;
 use std::rc::Rc;
 
@@ -123,11 +123,7 @@ fn calculate_distribution_similarity(
         union += count1.max(count2);
     }
 
-    if union == 0 {
-        1.0
-    } else {
-        intersection as f64 / union as f64
-    }
+    if union == 0 { 1.0 } else { intersection as f64 / union as f64 }
 }
 
 /// Calculate semantic similarity based on key nodes
@@ -256,10 +252,11 @@ fn extract_features_recursive(node: &TreeNode, features: &mut SemanticFeatures) 
         "call_expression" => {
             features.control_flow.insert("call".to_string());
             // Try to extract function name if available
-            if let Some(first_child) = node.children.first() {
-                if first_child.label == "identifier" && !first_child.value.is_empty() {
-                    features.function_calls.insert(first_child.value.clone());
-                }
+            if let Some(first_child) = node.children.first()
+                && first_child.label == "identifier"
+                && !first_child.value.is_empty()
+            {
+                features.function_calls.insert(first_child.value.clone());
             }
         }
         _ => {}

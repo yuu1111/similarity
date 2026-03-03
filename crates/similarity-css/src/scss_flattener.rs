@@ -431,8 +431,10 @@ mod tests {
         let rules = flatten_scss_rules(scss).unwrap();
 
         assert!(rules.iter().any(|r| r.selector == ".container"));
-        assert!(rules
-            .iter()
-            .any(|r| r.selector.contains("@media") && r.selector.contains(".container")));
+        assert!(
+            rules
+                .iter()
+                .any(|r| r.selector.contains("@media") && r.selector.contains(".container"))
+        );
     }
 }

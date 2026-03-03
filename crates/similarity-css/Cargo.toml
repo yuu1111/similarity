@@ -1,7 +1,7 @@
 [package]
 name = "similarity-css"
 version = "0.4.2"
-edition = "2021"
+edition = "2024"
 authors = ["similarity contributors"]
 description = "CSS/SCSS similarity detection tool (experimental)"
 license = "MIT"

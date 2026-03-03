@@ -1,11 +1,11 @@
 use crate::{
-    function_extractor::{extract_functions, FunctionDefinition},
+    function_extractor::{FunctionDefinition, extract_functions},
     parser::parse_and_convert_to_tree,
     subtree_fingerprint::{
-        detect_partial_overlaps, generate_subtree_fingerprints, IndexedFunction, OverlapOptions,
-        PartialOverlap,
+        IndexedFunction, OverlapOptions, PartialOverlap, detect_partial_overlaps,
+        generate_subtree_fingerprints,
     },
-    tsed::{calculate_tsed, TSEDOptions},
+    tsed::{TSEDOptions, calculate_tsed},
 };
 use std::collections::HashMap;
 

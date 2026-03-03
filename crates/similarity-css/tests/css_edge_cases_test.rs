@@ -1,5 +1,5 @@
 use similarity_core::language_parser::LanguageParser;
-use similarity_css::{calculate_specificity, convert_to_css_rule, CssParser, DuplicateAnalyzer};
+use similarity_css::{CssParser, DuplicateAnalyzer, calculate_specificity, convert_to_css_rule};
 
 #[test]
 fn test_pseudo_elements_and_classes() {

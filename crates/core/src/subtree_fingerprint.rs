@@ -379,11 +379,7 @@ fn calculate_fingerprint_similarity(fp1: &SubtreeFingerprint, fp2: &SubtreeFinge
     let intersection = set1.intersection(&set2).count();
     let union = set1.union(&set2).count();
 
-    if union == 0 {
-        0.0
-    } else {
-        intersection as f64 / union as f64
-    }
+    if union == 0 { 0.0 } else { intersection as f64 / union as f64 }
 }
 
 /// Remove duplicate/overlapping results

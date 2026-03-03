@@ -2,11 +2,11 @@
 
 use crate::parallel::check_within_file_duplicates_parallel;
 use similarity_core::{
+    TSEDOptions,
     cli_file_utils::collect_files,
     cli_output::{format_function_output, show_function_code},
     cli_parallel::SimilarityResult,
     language_parser::{GenericFunctionDef, LanguageParser},
-    TSEDOptions,
 };
 use std::path::PathBuf;
 
@@ -59,13 +59,12 @@ pub fn check_paths(
     // First, count and list all functions
     let mut all_functions = Vec::new();
     for file in &files {
-        if let Ok(content) = std::fs::read_to_string(file) {
-            if let Ok(mut parser) = crate::elixir_parser::ElixirParser::new() {
-                if let Ok(functions) = parser.extract_functions(&content, &file.to_string_lossy()) {
-                    for func in functions {
-                        all_functions.push(func);
-                    }
-                }
+        if let Ok(content) = std::fs::read_to_string(file)
+            && let Ok(mut parser) = crate::elixir_parser::ElixirParser::new()
+            && let Ok(functions) = parser.extract_functions(&content, &file.to_string_lossy())
+        {
+            for func in functions {
+                all_functions.push(func);
             }
         }
     }
@@ -120,12 +119,11 @@ fn display_all_results(
     if filter_function.is_some() || filter_function_body.is_some() {
         all_results.retain(|dup| {
             // Check function name filter
-            if let Some(filter) = filter_function {
-                if !dup.result.func1.name.contains(filter)
-                    && !dup.result.func2.name.contains(filter)
-                {
-                    return false;
-                }
+            if let Some(filter) = filter_function
+                && !dup.result.func1.name.contains(filter)
+                && !dup.result.func2.name.contains(filter)
+            {
+                return false;
             }
 
             // For body filter, we'd need to read the file content

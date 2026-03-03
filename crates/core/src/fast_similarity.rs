@@ -1,6 +1,6 @@
 use crate::ast_fingerprint::AstFingerprint;
 use crate::compare_functions;
-use crate::function_extractor::{extract_functions, FunctionDefinition, SimilarityResult};
+use crate::function_extractor::{FunctionDefinition, SimilarityResult, extract_functions};
 use crate::tsed::TSEDOptions;
 
 /// Fast similarity options

@@ -1,4 +1,4 @@
-use crate::{calculate_rule_similarity, CssRule, SelectorAnalysis, SerializableCssRule};
+use crate::{CssRule, SelectorAnalysis, SerializableCssRule, calculate_rule_similarity};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -110,17 +110,16 @@ impl DuplicateAnalyzer {
                     // Check if they're BEM variations
                     if let (Some(bem1), Some(bem2)) =
                         (&sel_analysis1.bem_parts, &sel_analysis2.bem_parts)
+                        && bem1.block == bem2.block
                     {
-                        if bem1.block == bem2.block {
-                            bem_variations.push(DuplicateRule {
-                                rule1: rule1.clone(),
-                                rule2: rule2.clone(),
-                                similarity,
-                                duplicate_type: DuplicateType::BemVariation {
-                                    component: bem1.block.clone(),
-                                },
-                            });
-                        }
+                        bem_variations.push(DuplicateRule {
+                            rule1: rule1.clone(),
+                            rule2: rule2.clone(),
+                            similarity,
+                            duplicate_type: DuplicateType::BemVariation {
+                                component: bem1.block.clone(),
+                            },
+                        });
                     }
                 }
 

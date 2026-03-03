@@ -124,11 +124,7 @@ impl MorphologicalSimilarityCalculator {
         let intersection = set1.intersection(&set2).count();
         let union = set1.union(&set2).count();
 
-        if union == 0 {
-            0.0
-        } else {
-            intersection as f64 / union as f64
-        }
+        if union == 0 { 0.0 } else { intersection as f64 / union as f64 }
     }
 
     /// TF-IDF風の重み付き類似性を計算
@@ -224,11 +220,7 @@ impl MorphologicalSimilarityCalculator {
             norm2 += weight2 * weight2;
         }
 
-        if norm1 == 0.0 || norm2 == 0.0 {
-            0.0
-        } else {
-            dot_product / (norm1.sqrt() * norm2.sqrt())
-        }
+        if norm1 == 0.0 || norm2 == 0.0 { 0.0 } else { dot_product / (norm1.sqrt() * norm2.sqrt()) }
     }
 }
 

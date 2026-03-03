@@ -4,7 +4,7 @@ use similarity_core::language_parser::{
 };
 use similarity_core::parser::parse_and_convert_to_tree;
 use similarity_core::tree::TreeNode;
-use similarity_core::type_extractor::{extract_types_from_code, TypeKind};
+use similarity_core::type_extractor::{TypeKind, extract_types_from_code};
 use std::error::Error;
 use std::rc::Rc;
 

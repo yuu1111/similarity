@@ -144,13 +144,13 @@ fn are_fingerprints_similar(fp1: &str, fp2: &str) -> bool {
         .collect();
 
     // Check property count difference
-    if let (Some(props1), Some(props2)) = (parts1.get("props"), parts2.get("props")) {
-        if let (Ok(count1), Ok(count2)) = (props1.parse::<usize>(), props2.parse::<usize>()) {
-            let diff = (count1 as isize - count2 as isize).abs();
-            // Allow up to 2 property difference
-            if diff > 2 {
-                return false;
-            }
+    if let (Some(props1), Some(props2)) = (parts1.get("props"), parts2.get("props"))
+        && let (Ok(count1), Ok(count2)) = (props1.parse::<usize>(), props2.parse::<usize>())
+    {
+        let diff = (count1 as isize - count2 as isize).abs();
+        // Allow up to 2 property difference
+        if diff > 2 {
+            return false;
         }
     }
 

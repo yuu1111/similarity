@@ -1,7 +1,7 @@
 use similarity_core::language_parser::LanguageParser;
 use similarity_core::{
     apted::APTEDOptions,
-    tsed::{calculate_tsed, TSEDOptions},
+    tsed::{TSEDOptions, calculate_tsed},
 };
 use similarity_rs::rust_parser::RustParser;
 

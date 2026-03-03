@@ -211,12 +211,11 @@ fn find_markdown_files(
         let path = Path::new(path_str);
 
         if path.is_file() {
-            if is_markdown_file(path, extensions) {
-                if let Ok(canonical) = path.canonicalize() {
-                    if visited.insert(canonical.clone()) {
-                        files.push(path.to_path_buf());
-                    }
-                }
+            if is_markdown_file(path, extensions)
+                && let Ok(canonical) = path.canonicalize()
+                && visited.insert(canonical.clone())
+            {
+                files.push(path.to_path_buf());
             }
         } else if path.is_dir() {
             let walker = WalkBuilder::new(path).follow_links(false).build();
@@ -230,18 +229,17 @@ fn find_markdown_files(
                 }
 
                 // Check if path should be excluded
-                if let Some(ref matcher) = exclude_matcher {
-                    if matcher.is_match(entry_path) {
-                        continue;
-                    }
+                if let Some(ref matcher) = exclude_matcher
+                    && matcher.is_match(entry_path)
+                {
+                    continue;
                 }
 
-                if is_markdown_file(entry_path, extensions) {
-                    if let Ok(canonical) = entry_path.canonicalize() {
-                        if visited.insert(canonical.clone()) {
-                            files.push(entry_path.to_path_buf());
-                        }
-                    }
+                if is_markdown_file(entry_path, extensions)
+                    && let Ok(canonical) = entry_path.canonicalize()
+                    && visited.insert(canonical.clone())
+                {
+                    files.push(entry_path.to_path_buf());
                 }
             }
         } else {
@@ -253,10 +251,10 @@ fn find_markdown_files(
 }
 
 fn is_markdown_file(path: &Path, extensions: &[String]) -> bool {
-    if let Some(ext) = path.extension() {
-        if let Some(ext_str) = ext.to_str() {
-            return extensions.iter().any(|e| e == ext_str);
-        }
+    if let Some(ext) = path.extension()
+        && let Some(ext_str) = ext.to_str()
+    {
+        return extensions.iter().any(|e| e == ext_str);
     }
     false
 }

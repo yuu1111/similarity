@@ -119,12 +119,11 @@ fn display_all_results(
     if filter_function.is_some() || filter_function_body.is_some() {
         all_results.retain(|dup| {
             // Check function name filter
-            if let Some(filter) = filter_function {
-                if !dup.result.func1.name.contains(filter)
-                    && !dup.result.func2.name.contains(filter)
-                {
-                    return false;
-                }
+            if let Some(filter) = filter_function
+                && !dup.result.func1.name.contains(filter)
+                && !dup.result.func2.name.contains(filter)
+            {
+                return false;
             }
 
             // Check function body filter
@@ -145,16 +144,14 @@ fn display_all_results(
                 }
 
                 // Check second function if no match yet
-                if !match_found {
-                    if let Ok(content) = fs::read_to_string(&dup.file2) {
-                        let func2_body = extract_lines_from_content(
-                            &content,
-                            dup.result.func2.start_line,
-                            dup.result.func2.end_line,
-                        );
-                        if func2_body.contains(filter) {
-                            match_found = true;
-                        }
+                if !match_found && let Ok(content) = fs::read_to_string(&dup.file2) {
+                    let func2_body = extract_lines_from_content(
+                        &content,
+                        dup.result.func2.start_line,
+                        dup.result.func2.end_line,
+                    );
+                    if func2_body.contains(filter) {
+                        match_found = true;
                     }
                 }
 
@@ -283,16 +280,13 @@ pub fn check_paths(
 
         if path.is_file() {
             // If it's a file, check extension and add it
-            if let Some(ext) = path.extension() {
-                if let Some(ext_str) = ext.to_str() {
-                    if exts.contains(&ext_str) {
-                        if let Ok(canonical) = path.canonicalize() {
-                            if visited.insert(canonical.clone()) {
-                                files.push(path.to_path_buf());
-                            }
-                        }
-                    }
-                }
+            if let Some(ext) = path.extension()
+                && let Some(ext_str) = ext.to_str()
+                && exts.contains(&ext_str)
+                && let Ok(canonical) = path.canonicalize()
+                && visited.insert(canonical.clone())
+            {
+                files.push(path.to_path_buf());
             }
         } else if path.is_dir() {
             // If it's a directory, walk it respecting .gitignore
@@ -320,26 +314,22 @@ pub fn check_paths(
                     }
 
                     // Also check relative path from current directory
-                    if let Ok(current_dir) = std::env::current_dir() {
-                        if let Ok(relative) = entry_path.strip_prefix(&current_dir) {
-                            if matcher.is_match(relative) {
-                                continue;
-                            }
-                        }
+                    if let Ok(current_dir) = std::env::current_dir()
+                        && let Ok(relative) = entry_path.strip_prefix(&current_dir)
+                        && matcher.is_match(relative)
+                    {
+                        continue;
                     }
                 }
 
                 // Check extension
-                if let Some(ext) = entry_path.extension() {
-                    if let Some(ext_str) = ext.to_str() {
-                        if exts.contains(&ext_str) {
-                            if let Ok(canonical) = entry_path.canonicalize() {
-                                if visited.insert(canonical.clone()) {
-                                    files.push(entry_path.to_path_buf());
-                                }
-                            }
-                        }
-                    }
+                if let Some(ext) = entry_path.extension()
+                    && let Some(ext_str) = ext.to_str()
+                    && exts.contains(&ext_str)
+                    && let Ok(canonical) = entry_path.canonicalize()
+                    && visited.insert(canonical.clone())
+                {
+                    files.push(entry_path.to_path_buf());
                 }
             }
         } else {

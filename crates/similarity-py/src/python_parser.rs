@@ -65,77 +65,74 @@ impl PythonParser {
         ) {
             match node.kind() {
                 "function_definition" => {
-                    if let Some(name_node) = node.child_by_field_name("name") {
-                        if let Ok(name) = name_node.utf8_text(source.as_bytes()) {
-                            let params_node = node.child_by_field_name("parameters");
-                            let body_node = node.child_by_field_name("body");
+                    if let Some(name_node) = node.child_by_field_name("name")
+                        && let Ok(name) = name_node.utf8_text(source.as_bytes())
+                    {
+                        let params_node = node.child_by_field_name("parameters");
+                        let body_node = node.child_by_field_name("body");
 
-                            let params = extract_params(params_node, source);
+                        let params = extract_params(params_node, source);
 
-                            functions.push(GenericFunctionDef {
-                                name: name.to_string(),
-                                start_line: node.start_position().row as u32 + 1,
-                                end_line: node.end_position().row as u32 + 1,
-                                body_start_line: body_node
-                                    .map(|n| n.start_position().row as u32 + 1)
-                                    .unwrap_or(0),
-                                body_end_line: body_node
-                                    .map(|n| n.end_position().row as u32 + 1)
-                                    .unwrap_or(0),
-                                parameters: params,
-                                is_method: class_name.is_some(),
-                                class_name: class_name.map(|s| s.to_string()),
-                                is_async: is_async_def(node, source),
-                                is_generator: is_generator_def(node, source),
-                                decorators: extract_decorators(node, source),
-                            });
-                        }
+                        functions.push(GenericFunctionDef {
+                            name: name.to_string(),
+                            start_line: node.start_position().row as u32 + 1,
+                            end_line: node.end_position().row as u32 + 1,
+                            body_start_line: body_node
+                                .map(|n| n.start_position().row as u32 + 1)
+                                .unwrap_or(0),
+                            body_end_line: body_node
+                                .map(|n| n.end_position().row as u32 + 1)
+                                .unwrap_or(0),
+                            parameters: params,
+                            is_method: class_name.is_some(),
+                            class_name: class_name.map(|s| s.to_string()),
+                            is_async: is_async_def(node, source),
+                            is_generator: is_generator_def(node, source),
+                            decorators: extract_decorators(node, source),
+                        });
                     }
                 }
                 "decorated_definition" => {
                     // Check if it decorates a function
-                    if let Some(child) = node.child((node.child_count().saturating_sub(1)) as u32) {
-                        if child.kind() == "function_definition" {
-                            if let Some(name_node) = child.child_by_field_name("name") {
-                                if let Ok(name) = name_node.utf8_text(source.as_bytes()) {
-                                    let params_node = child.child_by_field_name("parameters");
-                                    let body_node = child.child_by_field_name("body");
+                    if let Some(child) = node.child((node.child_count().saturating_sub(1)) as u32)
+                        && child.kind() == "function_definition"
+                        && let Some(name_node) = child.child_by_field_name("name")
+                        && let Ok(name) = name_node.utf8_text(source.as_bytes())
+                    {
+                        let params_node = child.child_by_field_name("parameters");
+                        let body_node = child.child_by_field_name("body");
 
-                                    let params = extract_params(params_node, source);
+                        let params = extract_params(params_node, source);
 
-                                    functions.push(GenericFunctionDef {
-                                        name: name.to_string(),
-                                        start_line: node.start_position().row as u32 + 1,
-                                        end_line: node.end_position().row as u32 + 1,
-                                        body_start_line: body_node
-                                            .map(|n| n.start_position().row as u32 + 1)
-                                            .unwrap_or(0),
-                                        body_end_line: body_node
-                                            .map(|n| n.end_position().row as u32 + 1)
-                                            .unwrap_or(0),
-                                        parameters: params,
-                                        is_method: class_name.is_some(),
-                                        class_name: class_name.map(|s| s.to_string()),
-                                        is_async: is_async_def(child, source),
-                                        is_generator: is_generator_def(child, source),
-                                        decorators: extract_decorators(child, source),
-                                    });
-                                }
-                            }
-                        }
+                        functions.push(GenericFunctionDef {
+                            name: name.to_string(),
+                            start_line: node.start_position().row as u32 + 1,
+                            end_line: node.end_position().row as u32 + 1,
+                            body_start_line: body_node
+                                .map(|n| n.start_position().row as u32 + 1)
+                                .unwrap_or(0),
+                            body_end_line: body_node
+                                .map(|n| n.end_position().row as u32 + 1)
+                                .unwrap_or(0),
+                            parameters: params,
+                            is_method: class_name.is_some(),
+                            class_name: class_name.map(|s| s.to_string()),
+                            is_async: is_async_def(child, source),
+                            is_generator: is_generator_def(child, source),
+                            decorators: extract_decorators(child, source),
+                        });
                     }
                 }
                 "class_definition" => {
                     // Don't recurse into nested classes when we're already in a class
-                    if class_name.is_none() {
-                        if let Some(name_node) = node.child_by_field_name("name") {
-                            if let Ok(name) = name_node.utf8_text(source.as_bytes()) {
-                                // Recursively extract methods from this class
-                                let mut subcursor = node.walk();
-                                for child in node.children(&mut subcursor) {
-                                    visit_node(child, source, functions, Some(name));
-                                }
-                            }
+                    if class_name.is_none()
+                        && let Some(name_node) = node.child_by_field_name("name")
+                        && let Ok(name) = name_node.utf8_text(source.as_bytes())
+                    {
+                        // Recursively extract methods from this class
+                        let mut subcursor = node.walk();
+                        for child in node.children(&mut subcursor) {
+                            visit_node(child, source, functions, Some(name));
                         }
                     }
                 }
@@ -160,10 +157,10 @@ impl PythonParser {
         fn is_generator_def(node: Node, source: &str) -> bool {
             // Python generators are functions that contain yield statements
             // For simplicity, we'll just check if the function body contains "yield"
-            if let Some(body) = node.child_by_field_name("body") {
-                if let Ok(body_text) = body.utf8_text(source.as_bytes()) {
-                    return body_text.contains("yield");
-                }
+            if let Some(body) = node.child_by_field_name("body")
+                && let Ok(body_text) = body.utf8_text(source.as_bytes())
+            {
+                return body_text.contains("yield");
             }
             false
         }
@@ -177,10 +174,9 @@ impl PythonParser {
                 for child in parent.children(&mut cursor) {
                     if child.kind() == "decorator"
                         && child.end_position().row < node.start_position().row
+                        && let Ok(decorator_text) = child.utf8_text(source.as_bytes())
                     {
-                        if let Ok(decorator_text) = child.utf8_text(source.as_bytes()) {
-                            decorators.push(decorator_text.trim_start_matches('@').to_string());
-                        }
+                        decorators.push(decorator_text.trim_start_matches('@').to_string());
                     }
                 }
             }
@@ -201,10 +197,10 @@ impl PythonParser {
                             }
                         }
                         "typed_parameter" | "default_parameter" => {
-                            if let Some(ident) = child.child_by_field_name("name") {
-                                if let Ok(param_text) = ident.utf8_text(source.as_bytes()) {
-                                    params.push(param_text.to_string());
-                                }
+                            if let Some(ident) = child.child_by_field_name("name")
+                                && let Ok(param_text) = ident.utf8_text(source.as_bytes())
+                            {
+                                params.push(param_text.to_string());
                             }
                         }
                         _ => {}
@@ -272,18 +268,17 @@ impl LanguageParser for PythonParser {
         let mut types = Vec::new();
 
         fn visit_node_for_types(node: Node, source: &str, types: &mut Vec<GenericTypeDef>) {
-            if node.kind() == "class_definition" {
-                if let Some(name_node) = node.child_by_field_name("name") {
-                    if let Ok(name) = name_node.utf8_text(source.as_bytes()) {
-                        types.push(GenericTypeDef {
-                            name: name.to_string(),
-                            kind: "class".to_string(),
-                            start_line: node.start_position().row as u32 + 1,
-                            end_line: node.end_position().row as u32 + 1,
-                            fields: extract_class_fields(node, source),
-                        });
-                    }
-                }
+            if node.kind() == "class_definition"
+                && let Some(name_node) = node.child_by_field_name("name")
+                && let Ok(name) = name_node.utf8_text(source.as_bytes())
+            {
+                types.push(GenericTypeDef {
+                    name: name.to_string(),
+                    kind: "class".to_string(),
+                    start_line: node.start_position().row as u32 + 1,
+                    end_line: node.end_position().row as u32 + 1,
+                    fields: extract_class_fields(node, source),
+                });
             }
 
             // Continue traversing
@@ -300,16 +295,14 @@ impl LanguageParser for PythonParser {
                 let mut cursor = body.walk();
                 for child in body.children(&mut cursor) {
                     // Look for instance variable assignments in __init__ method
-                    if child.kind() == "function_definition" {
-                        if let Some(name_node) = child.child_by_field_name("name") {
-                            if let Ok(name) = name_node.utf8_text(source.as_bytes()) {
-                                if name == "__init__" {
-                                    // Extract self.field assignments from __init__
-                                    if let Some(func_body) = child.child_by_field_name("body") {
-                                        extract_self_assignments(func_body, source, &mut fields);
-                                    }
-                                }
-                            }
+                    if child.kind() == "function_definition"
+                        && let Some(name_node) = child.child_by_field_name("name")
+                        && let Ok(name) = name_node.utf8_text(source.as_bytes())
+                        && name == "__init__"
+                    {
+                        // Extract self.field assignments from __init__
+                        if let Some(func_body) = child.child_by_field_name("body") {
+                            extract_self_assignments(func_body, source, &mut fields);
                         }
                     }
                 }
@@ -321,18 +314,15 @@ impl LanguageParser for PythonParser {
         fn extract_self_assignments(node: Node, source: &str, fields: &mut Vec<String>) {
             let mut cursor = node.walk();
             for child in node.children(&mut cursor) {
-                if child.kind() == "assignment" {
-                    if let Some(left) = child.child(0) {
-                        if left.kind() == "attribute" {
-                            if let Ok(text) = left.utf8_text(source.as_bytes()) {
-                                if text.starts_with("self.") {
-                                    let field_name = text.trim_start_matches("self.");
-                                    if !fields.contains(&field_name.to_string()) {
-                                        fields.push(field_name.to_string());
-                                    }
-                                }
-                            }
-                        }
+                if child.kind() == "assignment"
+                    && let Some(left) = child.child(0)
+                    && left.kind() == "attribute"
+                    && let Ok(text) = left.utf8_text(source.as_bytes())
+                    && text.starts_with("self.")
+                {
+                    let field_name = text.trim_start_matches("self.");
+                    if !fields.contains(&field_name.to_string()) {
+                        fields.push(field_name.to_string());
                     }
                 }
                 // Recursively check nested nodes

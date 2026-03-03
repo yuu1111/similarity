@@ -145,9 +145,8 @@ fn extract_rules(node: &Node, source: &str, functions: &mut Vec<GenericFunctionD
         match child.kind() {
             "rule_set" | "ruleset" => {
                 // Try to get selector - CSS uses different structure
-                let selector = child.child_by_field_name("selectors")
-                    .or_else(|| child.child(0)); // fallback to first child
-                    
+                let selector = child.child_by_field_name("selectors").or_else(|| child.child(0)); // fallback to first child
+
                 if let Some(selector_node) = selector {
                     let selector_text = selector_node.utf8_text(source.as_bytes()).unwrap_or("");
 
@@ -156,14 +155,13 @@ fn extract_rules(node: &Node, source: &str, functions: &mut Vec<GenericFunctionD
                     if let Some(block) = child.child_by_field_name("block") {
                         let mut block_cursor = block.walk();
                         for decl in block.children(&mut block_cursor) {
-                            if decl.kind() == "declaration" {
-                                if let Some(prop) = decl.child_by_field_name("property") {
-                                    if let Some(val) = decl.child_by_field_name("value") {
-                                        let prop_text = prop.utf8_text(source.as_bytes()).unwrap_or("");
-                                        let val_text = val.utf8_text(source.as_bytes()).unwrap_or("");
-                                        decorators.push(format!("{}: {}", prop_text, val_text));
-                                    }
-                                }
+                            if decl.kind() == "declaration"
+                                && let Some(prop) = decl.child_by_field_name("property")
+                                && let Some(val) = decl.child_by_field_name("value")
+                            {
+                                let prop_text = prop.utf8_text(source.as_bytes()).unwrap_or("");
+                                let val_text = val.utf8_text(source.as_bytes()).unwrap_or("");
+                                decorators.push(format!("{}: {}", prop_text, val_text));
                             }
                         }
                     }

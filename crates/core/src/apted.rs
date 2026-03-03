@@ -57,11 +57,7 @@ fn compute_edit_distance_recursive(
             }
         } else {
             // Compare only label (structural comparison)
-            if node1.label == node2.label {
-                0.0
-            } else {
-                options.rename_cost
-            }
+            if node1.label == node2.label { 0.0 } else { options.rename_cost }
         };
         memo.insert(key, cost);
         return cost;
@@ -81,11 +77,7 @@ fn compute_edit_distance_recursive(
         }
     } else {
         // Compare only label (structural comparison)
-        if node1.label == node2.label {
-            0.0
-        } else {
-            options.rename_cost
-        }
+        if node1.label == node2.label { 0.0 } else { options.rename_cost }
     };
 
     if !node1.children.is_empty() || !node2.children.is_empty() {

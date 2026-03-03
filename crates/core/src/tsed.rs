@@ -1,4 +1,4 @@
-use crate::apted::{compute_edit_distance, APTEDOptions};
+use crate::apted::{APTEDOptions, compute_edit_distance};
 use crate::tree::TreeNode;
 use std::rc::Rc;
 

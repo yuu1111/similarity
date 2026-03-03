@@ -1,10 +1,10 @@
 use crate::{
     language_parser::{GenericFunctionDef, LanguageParser},
     subtree_fingerprint::{
-        detect_partial_overlaps, generate_subtree_fingerprints, IndexedFunction, OverlapOptions,
-        PartialOverlap,
+        IndexedFunction, OverlapOptions, PartialOverlap, detect_partial_overlaps,
+        generate_subtree_fingerprints,
     },
-    tsed::{calculate_tsed, TSEDOptions},
+    tsed::{TSEDOptions, calculate_tsed},
 };
 use std::collections::HashMap;
 use std::error::Error;

@@ -1,7 +1,7 @@
 #![allow(clippy::uninlined_format_args)]
 
 use similarity_core::language_parser::LanguageParser;
-use similarity_core::{calculate_enhanced_similarity, APTEDOptions, EnhancedSimilarityOptions};
+use similarity_core::{APTEDOptions, EnhancedSimilarityOptions, calculate_enhanced_similarity};
 use similarity_rs::rust_parser::RustParser;
 
 #[test]

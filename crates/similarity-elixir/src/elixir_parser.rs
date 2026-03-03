@@ -29,45 +29,44 @@ impl ElixirParser {
         let node_kind = node.kind();
 
         // Check if this is a call node that could be a function or module
-        if node_kind == "call" {
-            if let Some(target_node) = node.child_by_field_name("target") {
-                if let Ok(target_text) = target_node.utf8_text(source.as_bytes()) {
-                    match target_text {
-                        // Function definitions
-                        "def" | "defp" | "defmacro" | "defmacrop" => {
-                            if let Some(func_def) =
-                                self.extract_function_definition(node, source, module_name)
-                            {
-                                functions.push(func_def);
-                            }
-                            return; // Don't traverse children
-                        }
-                        // Module definitions
-                        "defmodule" | "defprotocol" | "defimpl" => {
-                            // Extract module name
-                            let new_module_name = node
-                                .child_by_field_name("arguments")
-                                .and_then(|args| args.child(0))
-                                .and_then(|n| n.utf8_text(source.as_bytes()).ok())
-                                .unwrap_or("");
-
-                            // Process do_block
-                            let do_block = node.child(2).filter(|n| n.kind() == "do_block");
-                            if let Some(do_block) = do_block {
-                                for child in do_block.children(&mut do_block.walk()) {
-                                    self.extract_functions_from_node(
-                                        child,
-                                        source,
-                                        functions,
-                                        Some(new_module_name),
-                                    );
-                                }
-                            }
-                            return; // Don't traverse children normally
-                        }
-                        _ => {} // Continue normal traversal
+        if node_kind == "call"
+            && let Some(target_node) = node.child_by_field_name("target")
+            && let Ok(target_text) = target_node.utf8_text(source.as_bytes())
+        {
+            match target_text {
+                // Function definitions
+                "def" | "defp" | "defmacro" | "defmacrop" => {
+                    if let Some(func_def) =
+                        self.extract_function_definition(node, source, module_name)
+                    {
+                        functions.push(func_def);
                     }
+                    return; // Don't traverse children
                 }
+                // Module definitions
+                "defmodule" | "defprotocol" | "defimpl" => {
+                    // Extract module name
+                    let new_module_name = node
+                        .child_by_field_name("arguments")
+                        .and_then(|args| args.child(0))
+                        .and_then(|n| n.utf8_text(source.as_bytes()).ok())
+                        .unwrap_or("");
+
+                    // Process do_block
+                    let do_block = node.child(2).filter(|n| n.kind() == "do_block");
+                    if let Some(do_block) = do_block {
+                        for child in do_block.children(&mut do_block.walk()) {
+                            self.extract_functions_from_node(
+                                child,
+                                source,
+                                functions,
+                                Some(new_module_name),
+                            );
+                        }
+                    }
+                    return; // Don't traverse children normally
+                }
+                _ => {} // Continue normal traversal
             }
         }
 
@@ -138,10 +137,10 @@ impl ElixirParser {
 
         let mut params = Vec::new();
         for child in node.children(&mut node.walk()) {
-            if child.kind() == "identifier" {
-                if let Ok(param_text) = child.utf8_text(source.as_bytes()) {
-                    params.push(param_text.to_string());
-                }
+            if child.kind() == "identifier"
+                && let Ok(param_text) = child.utf8_text(source.as_bytes())
+            {
+                params.push(param_text.to_string());
             }
         }
         params
@@ -211,33 +210,31 @@ impl LanguageParser for ElixirParser {
 
 impl ElixirParser {
     fn extract_types_from_node(node: Node, source: &str, types: &mut Vec<GenericTypeDef>) {
-        if node.kind() == "call" {
-            if let Some(target_node) = node.child_by_field_name("target") {
-                if let Ok(target_text) = target_node.utf8_text(source.as_bytes()) {
-                    if matches!(target_text, "defmodule" | "defprotocol" | "defimpl") {
-                        // Extract type name
-                        let name = node
-                            .child_by_field_name("arguments")
-                            .and_then(|args| args.child(0))
-                            .and_then(|n| n.utf8_text(source.as_bytes()).ok())
-                            .unwrap_or("");
+        if node.kind() == "call"
+            && let Some(target_node) = node.child_by_field_name("target")
+            && let Ok(target_text) = target_node.utf8_text(source.as_bytes())
+            && matches!(target_text, "defmodule" | "defprotocol" | "defimpl")
+        {
+            // Extract type name
+            let name = node
+                .child_by_field_name("arguments")
+                .and_then(|args| args.child(0))
+                .and_then(|n| n.utf8_text(source.as_bytes()).ok())
+                .unwrap_or("");
 
-                        types.push(GenericTypeDef {
-                            name: name.to_string(),
-                            start_line: node.start_position().row as u32 + 1,
-                            end_line: node.end_position().row as u32 + 1,
-                            kind: match target_text {
-                                "defmodule" => "module",
-                                "defprotocol" => "protocol",
-                                "defimpl" => "implementation",
-                                _ => "unknown",
-                            }
-                            .to_string(),
-                            fields: Vec::new(),
-                        });
-                    }
+            types.push(GenericTypeDef {
+                name: name.to_string(),
+                start_line: node.start_position().row as u32 + 1,
+                end_line: node.end_position().row as u32 + 1,
+                kind: match target_text {
+                    "defmodule" => "module",
+                    "defprotocol" => "protocol",
+                    "defimpl" => "implementation",
+                    _ => "unknown",
                 }
-            }
+                .to_string(),
+                fields: Vec::new(),
+            });
         }
 
         // Continue searching in children

@@ -1,5 +1,5 @@
 use similarity_core::language_parser::LanguageParser;
-use similarity_css::{convert_to_css_rule, CssParser, DuplicateAnalyzer};
+use similarity_css::{CssParser, DuplicateAnalyzer, convert_to_css_rule};
 use std::time::Instant;
 
 #[test]

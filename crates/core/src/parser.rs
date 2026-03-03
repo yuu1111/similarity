@@ -61,10 +61,10 @@ fn statement_to_tree_node(stmt: &Statement, id_counter: &mut usize) -> Option<Rc
             }
 
             // Add body
-            if let Some(body) = &func.body {
-                if let Some(body_node) = function_body_to_tree_node(body, id_counter) {
-                    node.add_child(body_node);
-                }
+            if let Some(body) = &func.body
+                && let Some(body_node) = function_body_to_tree_node(body, id_counter)
+            {
+                node.add_child(body_node);
             }
 
             Some(Rc::new(node))
@@ -119,10 +119,10 @@ fn statement_to_tree_node(stmt: &Statement, id_counter: &mut usize) -> Option<Rc
             }
 
             // Add alternate if exists
-            if let Some(alt) = &if_stmt.alternate {
-                if let Some(alt_node) = statement_to_tree_node(alt, id_counter) {
-                    node.add_child(alt_node);
-                }
+            if let Some(alt) = &if_stmt.alternate
+                && let Some(alt_node) = statement_to_tree_node(alt, id_counter)
+            {
+                node.add_child(alt_node);
             }
 
             Some(Rc::new(node))
@@ -135,10 +135,10 @@ fn statement_to_tree_node(stmt: &Statement, id_counter: &mut usize) -> Option<Rc
             );
             *id_counter += 1;
 
-            if let Some(arg) = &ret_stmt.argument {
-                if let Some(arg_node) = expression_to_tree_node(arg, id_counter) {
-                    node.add_child(arg_node);
-                }
+            if let Some(arg) = &ret_stmt.argument
+                && let Some(arg_node) = expression_to_tree_node(arg, id_counter)
+            {
+                node.add_child(arg_node);
             }
 
             Some(Rc::new(node))
@@ -212,10 +212,10 @@ fn expression_to_tree_node(expr: &Expression, id_counter: &mut usize) -> Option<
             }
 
             for arg in &call_expr.arguments {
-                if let Some(expr) = arg.as_expression() {
-                    if let Some(arg_node) = expression_to_tree_node(expr, id_counter) {
-                        node.add_child(arg_node);
-                    }
+                if let Some(expr) = arg.as_expression()
+                    && let Some(arg_node) = expression_to_tree_node(expr, id_counter)
+                {
+                    node.add_child(arg_node);
                 }
             }
 
@@ -241,12 +241,10 @@ fn expression_to_tree_node(expr: &Expression, id_counter: &mut usize) -> Option<
                 // Expression body (e.g., => x + 1)
                 if let Some(Statement::ExpressionStatement(expr_stmt)) =
                     arrow.body.statements.first()
-                {
-                    if let Some(expr_node) =
+                    && let Some(expr_node) =
                         expression_to_tree_node(&expr_stmt.expression, id_counter)
-                    {
-                        node.add_child(expr_node);
-                    }
+                {
+                    node.add_child(expr_node);
                 }
             } else {
                 // Block body (e.g., => { return x + 1; })
@@ -322,10 +320,10 @@ fn variable_declarator_to_tree_node(
     let mut node = TreeNode::new(label, "VariableDeclarator".to_string(), *id_counter);
     *id_counter += 1;
 
-    if let Some(init) = &decl.init {
-        if let Some(init_node) = expression_to_tree_node(init, id_counter) {
-            node.add_child(init_node);
-        }
+    if let Some(init) = &decl.init
+        && let Some(init_node) = expression_to_tree_node(init, id_counter)
+    {
+        node.add_child(init_node);
     }
 
     Some(Rc::new(node))
@@ -346,10 +344,10 @@ fn class_element_to_tree_node(
             *id_counter += 1;
 
             // Add method body
-            if let Some(body) = &method.value.body {
-                if let Some(body_node) = function_body_to_tree_node(body, id_counter) {
-                    node.add_child(body_node);
-                }
+            if let Some(body) = &method.value.body
+                && let Some(body_node) = function_body_to_tree_node(body, id_counter)
+            {
+                node.add_child(body_node);
             }
 
             Some(Rc::new(node))

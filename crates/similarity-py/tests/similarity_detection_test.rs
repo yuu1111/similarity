@@ -1,7 +1,7 @@
 use similarity_core::language_parser::LanguageParser;
 use similarity_core::{
-    calculate_enhanced_similarity, tsed::calculate_tsed, APTEDOptions, EnhancedSimilarityOptions,
-    TSEDOptions,
+    APTEDOptions, EnhancedSimilarityOptions, TSEDOptions, calculate_enhanced_similarity,
+    tsed::calculate_tsed,
 };
 use similarity_py::python_parser::PythonParser;
 

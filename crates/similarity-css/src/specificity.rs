@@ -215,12 +215,12 @@ impl SelectorAnalysis {
         }
 
         // Same specificity and BEM parts
-        if self.specificity == other.specificity {
-            if let (Some(bem1), Some(bem2)) = (&self.bem_parts, &other.bem_parts) {
-                return bem1.block == bem2.block
-                    && bem1.element == bem2.element
-                    && bem1.modifier == bem2.modifier;
-            }
+        if self.specificity == other.specificity
+            && let (Some(bem1), Some(bem2)) = (&self.bem_parts, &other.bem_parts)
+        {
+            return bem1.block == bem2.block
+                && bem1.element == bem2.element
+                && bem1.modifier == bem2.modifier;
         }
 
         false

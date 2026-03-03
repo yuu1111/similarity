@@ -54,17 +54,18 @@ pub fn simple_flatten_scss(
 
             if !selector_part.is_empty() {
                 // Save any pending rule
-                if !current_declarations.is_empty() && !selector_stack.is_empty() {
-                    if let Some(current_selectors) = selector_stack.last() {
-                        for selector in current_selectors {
-                            if !selector.starts_with('@') {
-                                rules.push(SimpleFlatRule {
-                                    selector: selector.clone(),
-                                    declarations: current_declarations.clone(),
-                                    start_line: rule_start_line,
-                                    end_line: line_num - 1,
-                                });
-                            }
+                if !current_declarations.is_empty()
+                    && !selector_stack.is_empty()
+                    && let Some(current_selectors) = selector_stack.last()
+                {
+                    for selector in current_selectors {
+                        if !selector.starts_with('@') {
+                            rules.push(SimpleFlatRule {
+                                selector: selector.clone(),
+                                declarations: current_declarations.clone(),
+                                start_line: rule_start_line,
+                                end_line: line_num - 1,
+                            });
                         }
                     }
                 }
@@ -144,17 +145,18 @@ pub fn simple_flatten_scss(
         // Close rule
         if close_braces > 0 {
             for _ in 0..close_braces {
-                if !current_declarations.is_empty() && !selector_stack.is_empty() {
-                    if let Some(current_selectors) = selector_stack.last() {
-                        for selector in current_selectors {
-                            if !selector.starts_with('@') {
-                                rules.push(SimpleFlatRule {
-                                    selector: selector.clone(),
-                                    declarations: current_declarations.clone(),
-                                    start_line: rule_start_line,
-                                    end_line: line_num,
-                                });
-                            }
+                if !current_declarations.is_empty()
+                    && !selector_stack.is_empty()
+                    && let Some(current_selectors) = selector_stack.last()
+                {
+                    for selector in current_selectors {
+                        if !selector.starts_with('@') {
+                            rules.push(SimpleFlatRule {
+                                selector: selector.clone(),
+                                declarations: current_declarations.clone(),
+                                start_line: rule_start_line,
+                                end_line: line_num,
+                            });
                         }
                     }
                 }

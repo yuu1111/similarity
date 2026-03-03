@@ -230,15 +230,15 @@ impl MarkdownParser {
         let mut metadata = HashMap::new();
 
         // Simple front matter extraction (YAML-style)
-        if let Some(stripped) = content.strip_prefix("---\n") {
-            if let Some(end_pos) = stripped.find("\n---\n") {
-                let front_matter = &stripped[..end_pos];
-                for line in front_matter.lines() {
-                    if let Some(colon_pos) = line.find(':') {
-                        let key = line[..colon_pos].trim().to_string();
-                        let value = line[colon_pos + 1..].trim().to_string();
-                        metadata.insert(key, value);
-                    }
+        if let Some(stripped) = content.strip_prefix("---\n")
+            && let Some(end_pos) = stripped.find("\n---\n")
+        {
+            let front_matter = &stripped[..end_pos];
+            for line in front_matter.lines() {
+                if let Some(colon_pos) = line.find(':') {
+                    let key = line[..colon_pos].trim().to_string();
+                    let value = line[colon_pos + 1..].trim().to_string();
+                    metadata.insert(key, value);
                 }
             }
         }
@@ -290,11 +290,7 @@ impl MarkdownSection {
         let plain_text = self.get_plain_content();
         let words: Vec<&str> = plain_text.split_whitespace().collect();
 
-        if words.len() <= max_words {
-            plain_text
-        } else {
-            words[..max_words].join(" ") + "..."
-        }
+        if words.len() <= max_words { plain_text } else { words[..max_words].join(" ") + "..." }
     }
 }
 

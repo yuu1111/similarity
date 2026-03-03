@@ -1,4 +1,4 @@
-use similarity_core::{find_function_overlaps, find_overlaps_across_files, OverlapOptions};
+use similarity_core::{OverlapOptions, find_function_overlaps, find_overlaps_across_files};
 use std::collections::HashMap;
 
 #[test]

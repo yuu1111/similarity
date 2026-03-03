@@ -2,8 +2,8 @@ use anyhow::Result;
 use ignore::WalkBuilder;
 use rayon::prelude::*;
 use similarity_core::language_parser::{GenericTypeDef, LanguageParser};
-use similarity_core::tsed::{calculate_tsed, TSEDOptions};
-use similarity_core::{RustStructureComparator, ComparisonOptions};
+use similarity_core::tsed::{TSEDOptions, calculate_tsed};
+use similarity_core::{ComparisonOptions, RustStructureComparator};
 use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::Path;
@@ -60,20 +60,20 @@ fn are_fingerprints_similar(fp1: &str, fp2: &str) -> bool {
         .collect();
 
     // Check if they have the same kind
-    if let (Some(kind1), Some(kind2)) = (parts1.get("kind"), parts2.get("kind")) {
-        if kind1 != kind2 {
-            return false;
-        }
+    if let (Some(kind1), Some(kind2)) = (parts1.get("kind"), parts2.get("kind"))
+        && kind1 != kind2
+    {
+        return false;
     }
 
     // Check field count difference
-    if let (Some(fields1), Some(fields2)) = (parts1.get("fields"), parts2.get("fields")) {
-        if let (Ok(count1), Ok(count2)) = (fields1.parse::<usize>(), fields2.parse::<usize>()) {
-            let diff = (count1 as isize - count2 as isize).abs();
-            // Allow up to 2 field difference
-            if diff > 2 {
-                return false;
-            }
+    if let (Some(fields1), Some(fields2)) = (parts1.get("fields"), parts2.get("fields"))
+        && let (Ok(count1), Ok(count2)) = (fields1.parse::<usize>(), fields2.parse::<usize>())
+    {
+        let diff = (count1 as isize - count2 as isize).abs();
+        // Allow up to 2 field difference
+        if diff > 2 {
+            return false;
         }
     }
 
@@ -96,7 +96,7 @@ fn compare_types_with_structure(
     if type1.type_def.name == type2.type_def.name && type1.file_path == type2.file_path {
         return Ok(0.0);
     }
-    
+
     let result = comparator.compare_generic_types(&type1.type_def, &type2.type_def);
     Ok(result.overall_similarity)
 }
@@ -136,11 +136,7 @@ fn extract_type_code(content: &str, type_def: &GenericTypeDef) -> String {
     let start = (type_def.start_line as usize).saturating_sub(1);
     let end = (type_def.end_line as usize).min(lines.len());
 
-    if start < lines.len() && end > start {
-        lines[start..end].join("\n")
-    } else {
-        String::new()
-    }
+    if start < lines.len() && end > start { lines[start..end].join("\n") } else { String::new() }
 }
 
 /// Get relative path for display
@@ -176,16 +172,13 @@ pub fn check_types(
         let path = Path::new(path_str);
 
         if path.is_file() {
-            if let Some(ext) = path.extension() {
-                if let Some(ext_str) = ext.to_str() {
-                    if exts.iter().any(|e| e == ext_str) {
-                        if let Ok(canonical) = path.canonicalize() {
-                            if visited.insert(canonical.clone()) {
-                                files.push(path.to_path_buf());
-                            }
-                        }
-                    }
-                }
+            if let Some(ext) = path.extension()
+                && let Some(ext_str) = ext.to_str()
+                && exts.iter().any(|e| e == ext_str)
+                && let Ok(canonical) = path.canonicalize()
+                && visited.insert(canonical.clone())
+            {
+                files.push(path.to_path_buf());
             }
         } else if path.is_dir() {
             let walker = WalkBuilder::new(path).follow_links(false).build();
@@ -205,16 +198,13 @@ pub fn check_types(
                     }
                 }
 
-                if let Some(ext) = entry_path.extension() {
-                    if let Some(ext_str) = ext.to_str() {
-                        if exts.iter().any(|e| e == ext_str) {
-                            if let Ok(canonical) = entry_path.canonicalize() {
-                                if visited.insert(canonical.clone()) {
-                                    files.push(entry_path.to_path_buf());
-                                }
-                            }
-                        }
-                    }
+                if let Some(ext) = entry_path.extension()
+                    && let Some(ext_str) = ext.to_str()
+                    && exts.iter().any(|e| e == ext_str)
+                    && let Ok(canonical) = entry_path.canonicalize()
+                    && visited.insert(canonical.clone())
+                {
+                    files.push(entry_path.to_path_buf());
                 }
             }
         }
@@ -269,7 +259,7 @@ pub fn check_types(
 
     // Find similar types
     let mut similar_pairs = Vec::new();
-    
+
     if use_structure_comparison {
         // Use new structure comparison framework
         let structure_options = ComparisonOptions {
@@ -279,17 +269,17 @@ pub fn check_types(
             ..Default::default()
         };
         let mut comparator = RustStructureComparator::with_options(structure_options);
-        
+
         // Compare all type pairs
         for i in 0..extracted_types.len() {
             for j in (i + 1)..extracted_types.len() {
                 let type1 = &extracted_types[i];
                 let type2 = &extracted_types[j];
-                
-                if let Ok(similarity) = compare_types_with_structure(type1, type2, &mut comparator) {
-                    if similarity >= threshold {
-                        similar_pairs.push((i, j, similarity));
-                    }
+
+                if let Ok(similarity) = compare_types_with_structure(type1, type2, &mut comparator)
+                    && similarity >= threshold
+                {
+                    similar_pairs.push((i, j, similarity));
                 }
             }
         }
@@ -311,10 +301,10 @@ pub fn check_types(
                     let type1 = &extracted_types[idx1];
                     let type2 = &extracted_types[idx2];
 
-                    if let Ok(similarity) = compare_types(type1, type2, &mut parser, &options) {
-                        if similarity >= threshold {
-                            similar_pairs.push((idx1, idx2, similarity));
-                        }
+                    if let Ok(similarity) = compare_types(type1, type2, &mut parser, &options)
+                        && similarity >= threshold
+                    {
+                        similar_pairs.push((idx1, idx2, similarity));
                     }
                 }
             }
@@ -333,10 +323,11 @@ pub fn check_types(
                             let type1 = &extracted_types[idx1];
                             let type2 = &extracted_types[idx2];
 
-                            if let Ok(similarity) = compare_types(type1, type2, &mut parser, &options) {
-                                if similarity >= threshold {
-                                    similar_pairs.push((idx1, idx2, similarity));
-                                }
+                            if let Ok(similarity) =
+                                compare_types(type1, type2, &mut parser, &options)
+                                && similarity >= threshold
+                            {
+                                similar_pairs.push((idx1, idx2, similarity));
                             }
                         }
                     }

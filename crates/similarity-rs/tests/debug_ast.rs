@@ -42,7 +42,7 @@ fn func2(y: i32) -> i32 {
     print_tree(&tree2, 0);
 
     // Also check similarity
-    use similarity_core::{calculate_enhanced_similarity, APTEDOptions, EnhancedSimilarityOptions};
+    use similarity_core::{APTEDOptions, EnhancedSimilarityOptions, calculate_enhanced_similarity};
     let options = EnhancedSimilarityOptions {
         structural_weight: 0.7,
         size_weight: 0.2,

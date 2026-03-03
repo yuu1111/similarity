@@ -44,7 +44,7 @@ impl GenericTreeSitterParser {
                 return Err(Box::new(std::io::Error::new(
                     std::io::ErrorKind::InvalidInput,
                     format!("Unsupported language: {}", language_name),
-                )) as Box<dyn Error + Send + Sync>)
+                )) as Box<dyn Error + Send + Sync>);
             }
         };
 
@@ -88,10 +88,10 @@ impl GenericTreeSitterParser {
         }
 
         // Check if this is a function node
-        if self.config.function_nodes.contains(&node_kind.to_string()) {
-            if let Some(func_def) = self.extract_function_definition(node, source, class_name) {
-                functions.push(func_def);
-            }
+        if self.config.function_nodes.contains(&node_kind.to_string())
+            && let Some(func_def) = self.extract_function_definition(node, source, class_name)
+        {
+            functions.push(func_def);
         }
 
         // Check if this is a type/class node
@@ -251,10 +251,9 @@ impl GenericTreeSitterParser {
                 }
             } else if let Some(name_child) =
                 child.child_by_field_name(&self.config.field_mappings.name_field)
+                && let Ok(param_text) = name_child.utf8_text(source.as_bytes())
             {
-                if let Ok(param_text) = name_child.utf8_text(source.as_bytes()) {
-                    params.push(param_text.to_string());
-                }
+                params.push(param_text.to_string());
             }
         }
 
@@ -271,10 +270,9 @@ impl GenericTreeSitterParser {
                 for child in parent.children(&mut cursor) {
                     if child.kind() == decorator_field
                         && child.end_position().row < node.start_position().row
+                        && let Ok(decorator_text) = child.utf8_text(source.as_bytes())
                     {
-                        if let Ok(decorator_text) = child.utf8_text(source.as_bytes()) {
-                            decorators.push(decorator_text.trim_start_matches('@').to_string());
-                        }
+                        decorators.push(decorator_text.trim_start_matches('@').to_string());
                     }
                 }
             }
@@ -293,10 +291,10 @@ impl GenericTreeSitterParser {
 
     fn is_generator_function(&self, node: Node, source: &str) -> bool {
         // Check if function body contains yield
-        if let Some(body) = node.child_by_field_name(&self.config.field_mappings.body_field) {
-            if let Ok(body_text) = body.utf8_text(source.as_bytes()) {
-                return body_text.contains("yield");
-            }
+        if let Some(body) = node.child_by_field_name(&self.config.field_mappings.body_field)
+            && let Ok(body_text) = body.utf8_text(source.as_bytes())
+        {
+            return body_text.contains("yield");
         }
         false
     }
@@ -305,10 +303,10 @@ impl GenericTreeSitterParser {
         let node_kind = node.kind();
 
         // Check if this is a type node
-        if self.config.type_nodes.contains(&node_kind.to_string()) {
-            if let Some(type_def) = self.extract_type_definition(node, source) {
-                types.push(type_def);
-            }
+        if self.config.type_nodes.contains(&node_kind.to_string())
+            && let Some(type_def) = self.extract_type_definition(node, source)
+        {
+            types.push(type_def);
         }
 
         // Continue searching in children

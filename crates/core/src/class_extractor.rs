@@ -240,9 +240,7 @@ impl ClassExtractor {
             .iter()
             .map(|param| {
                 let name = match &param.pattern {
-                    oxc_ast::ast::BindingPattern::BindingIdentifier(ident) => {
-                        ident.name.as_str()
-                    }
+                    oxc_ast::ast::BindingPattern::BindingIdentifier(ident) => ident.name.as_str(),
                     _ => "param",
                 };
                 let type_str = param
@@ -338,9 +336,9 @@ impl ClassExtractor {
                                 .iter()
                                 .map(|param| {
                                     let param_name = match &param.pattern {
-                                        oxc_ast::ast::BindingPattern::BindingIdentifier(
-                                            ident,
-                                        ) => ident.name.as_str(),
+                                        oxc_ast::ast::BindingPattern::BindingIdentifier(ident) => {
+                                            ident.name.as_str()
+                                        }
                                         _ => "param",
                                     };
                                     let type_str = param

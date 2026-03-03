@@ -2,11 +2,11 @@
 
 use crate::parallel::check_within_file_duplicates_parallel;
 use similarity_core::{
+    TSEDOptions,
     cli_file_utils::collect_files,
     cli_output::{format_function_output, show_function_code},
     cli_parallel::SimilarityResult,
     language_parser::GenericFunctionDef,
-    TSEDOptions,
 };
 use std::path::PathBuf;
 
@@ -99,12 +99,11 @@ fn display_all_results(
     if filter_function.is_some() || filter_function_body.is_some() {
         all_results.retain(|dup| {
             // Check function name filter
-            if let Some(filter) = filter_function {
-                if !dup.result.func1.name.contains(filter)
-                    && !dup.result.func2.name.contains(filter)
-                {
-                    return false;
-                }
+            if let Some(filter) = filter_function
+                && !dup.result.func1.name.contains(filter)
+                && !dup.result.func2.name.contains(filter)
+            {
+                return false;
             }
 
             // For body filter, we'd need to read the file content

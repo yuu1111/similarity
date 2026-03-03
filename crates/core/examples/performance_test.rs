@@ -1,5 +1,5 @@
 use similarity_core::{
-    find_similar_functions_fast, find_similar_functions_in_file, FastSimilarityOptions, TSEDOptions,
+    FastSimilarityOptions, TSEDOptions, find_similar_functions_fast, find_similar_functions_in_file,
 };
 use std::time::Instant;
 

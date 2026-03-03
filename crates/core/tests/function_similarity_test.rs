@@ -1,5 +1,5 @@
 use similarity_core::{
-    find_similar_functions_across_files, find_similar_functions_in_file, TSEDOptions,
+    TSEDOptions, find_similar_functions_across_files, find_similar_functions_in_file,
 };
 
 #[test]

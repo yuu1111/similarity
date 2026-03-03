@@ -71,13 +71,12 @@ impl RustParser {
 
     fn is_test_function(&self, node: Node, source: &str) -> bool {
         // Check if function has #[test] attribute
-        if let Some(prev_sibling) = node.prev_sibling() {
-            if prev_sibling.kind() == "attribute_item" {
-                let attr_text =
-                    &source[prev_sibling.byte_range().start..prev_sibling.byte_range().end];
-                if attr_text.contains("test") {
-                    return true;
-                }
+        if let Some(prev_sibling) = node.prev_sibling()
+            && prev_sibling.kind() == "attribute_item"
+        {
+            let attr_text = &source[prev_sibling.byte_range().start..prev_sibling.byte_range().end];
+            if attr_text.contains("test") {
+                return true;
             }
         }
 
@@ -106,12 +105,11 @@ impl RustParser {
         let mut decorators = Vec::new();
 
         // Check for attributes (like #[test])
-        if let Some(prev_sibling) = node.prev_sibling() {
-            if prev_sibling.kind() == "attribute_item" {
-                let attr_text =
-                    &source[prev_sibling.byte_range().start..prev_sibling.byte_range().end];
-                decorators.push(attr_text.to_string());
-            }
+        if let Some(prev_sibling) = node.prev_sibling()
+            && prev_sibling.kind() == "attribute_item"
+        {
+            let attr_text = &source[prev_sibling.byte_range().start..prev_sibling.byte_range().end];
+            decorators.push(attr_text.to_string());
         }
 
         // Check for async
@@ -122,22 +120,18 @@ impl RustParser {
         }
 
         // Check if this is a method in an impl block
-        if let Some(parent) = node.parent() {
-            if parent.kind() == "declaration_list" {
-                if let Some(impl_node) = parent.parent() {
-                    if impl_node.kind() == "impl_item" {
-                        is_method = true;
-                        // Extract type name from impl block
-                        for child in impl_node.children(&mut impl_node.walk()) {
-                            if child.kind() == "type_identifier" {
-                                class_name = Some(
-                                    source[child.byte_range().start..child.byte_range().end]
-                                        .to_string(),
-                                );
-                                break;
-                            }
-                        }
-                    }
+        if let Some(parent) = node.parent()
+            && parent.kind() == "declaration_list"
+            && let Some(impl_node) = parent.parent()
+            && impl_node.kind() == "impl_item"
+        {
+            is_method = true;
+            // Extract type name from impl block
+            for child in impl_node.children(&mut impl_node.walk()) {
+                if child.kind() == "type_identifier" {
+                    class_name =
+                        Some(source[child.byte_range().start..child.byte_range().end].to_string());
+                    break;
                 }
             }
         }
@@ -168,23 +162,22 @@ impl RustParser {
                     let block_text = &source[child.byte_range().start..child.byte_range().end];
 
                     // Find the positions of the opening and closing braces
-                    if let Some(open_pos) = block_text.find('{') {
-                        if let Some(close_pos) = block_text.rfind('}') {
-                            let inner_content = &block_text[open_pos + 1..close_pos].trim();
+                    if let Some(open_pos) = block_text.find('{')
+                        && let Some(close_pos) = block_text.rfind('}')
+                    {
+                        let inner_content = &block_text[open_pos + 1..close_pos].trim();
 
-                            // Count newlines to determine actual line positions
-                            let _lines_before_block =
-                                source[..child.byte_range().start].lines().count();
-                            let lines_before_content =
-                                source[..child.byte_range().start + open_pos + 1].lines().count();
+                        // Count newlines to determine actual line positions
+                        let _lines_before_block =
+                            source[..child.byte_range().start].lines().count();
+                        let lines_before_content =
+                            source[..child.byte_range().start + open_pos + 1].lines().count();
 
-                            body_start_line = (lines_before_content + 1) as u32;
+                        body_start_line = (lines_before_content + 1) as u32;
 
-                            // Count lines in the inner content
-                            let content_lines = inner_content.lines().count();
-                            body_end_line =
-                                body_start_line + content_lines.saturating_sub(1) as u32;
-                        }
+                        // Count lines in the inner content
+                        let content_lines = inner_content.lines().count();
+                        body_end_line = body_start_line + content_lines.saturating_sub(1) as u32;
                     }
 
                     // Fallback to original positions if parsing fails
@@ -304,13 +297,13 @@ impl RustParser {
                 }
                 "field_declaration_list" => {
                     for field in child.children(&mut child.walk()) {
-                        if field.kind() == "field_declaration" {
-                            if let Some(field_name) = field.child_by_field_name("name") {
-                                let field_name_str = source
-                                    [field_name.byte_range().start..field_name.byte_range().end]
-                                    .to_string();
-                                fields.push(field_name_str);
-                            }
+                        if field.kind() == "field_declaration"
+                            && let Some(field_name) = field.child_by_field_name("name")
+                        {
+                            let field_name_str = source
+                                [field_name.byte_range().start..field_name.byte_range().end]
+                                .to_string();
+                            fields.push(field_name_str);
                         }
                     }
                 }
@@ -344,13 +337,13 @@ impl RustParser {
                 }
                 "enum_variant_list" => {
                     for variant in child.children(&mut child.walk()) {
-                        if variant.kind() == "enum_variant" {
-                            if let Some(variant_name) = variant.child_by_field_name("name") {
-                                let variant_name_str = source[variant_name.byte_range().start
-                                    ..variant_name.byte_range().end]
-                                    .to_string();
-                                variants.push(variant_name_str);
-                            }
+                        if variant.kind() == "enum_variant"
+                            && let Some(variant_name) = variant.child_by_field_name("name")
+                        {
+                            let variant_name_str = source
+                                [variant_name.byte_range().start..variant_name.byte_range().end]
+                                .to_string();
+                            variants.push(variant_name_str);
                         }
                     }
                 }

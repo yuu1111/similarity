@@ -1,7 +1,7 @@
 use similarity_core::language_parser::LanguageParser;
 use similarity_css::{
-    calculate_rule_similarity, calculate_specificity, convert_to_css_rule, CssParser, CssRule,
-    SelectorAnalysis,
+    CssParser, CssRule, SelectorAnalysis, calculate_rule_similarity, calculate_specificity,
+    convert_to_css_rule,
 };
 
 #[test]

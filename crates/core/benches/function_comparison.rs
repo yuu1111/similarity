@@ -1,8 +1,8 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, black_box, criterion_group, criterion_main};
 use similarity_core::{
-    find_similar_functions_across_files, find_similar_functions_across_files_fast,
-    find_similar_functions_fast, find_similar_functions_in_file, FastSimilarityOptions,
-    TSEDOptions,
+    FastSimilarityOptions, TSEDOptions, find_similar_functions_across_files,
+    find_similar_functions_across_files_fast, find_similar_functions_fast,
+    find_similar_functions_in_file,
 };
 
 const SMALL_FILE: &str = r#"

@@ -123,9 +123,11 @@ fn test_important_declarations() {
 
     // !important should be preserved but currently isn't handled
     // This is a known limitation
-    assert!(expanded
-        .iter()
-        .any(|(k, v)| k == "margin-top" && (v == "10px" || v.contains("!important"))));
+    assert!(
+        expanded
+            .iter()
+            .any(|(k, v)| k == "margin-top" && (v == "10px" || v.contains("!important")))
+    );
 }
 
 #[test]

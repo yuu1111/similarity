@@ -1,10 +1,10 @@
 use anyhow::Result;
 use clap::Parser;
+use similarity_core::APTEDOptions;
 use similarity_core::generic_parser_config::GenericParserConfig;
 use similarity_core::generic_tree_sitter_parser::GenericTreeSitterParser;
 use similarity_core::language_parser::LanguageParser;
-use similarity_core::tsed::{calculate_tsed, TSEDOptions};
-use similarity_core::APTEDOptions;
+use similarity_core::tsed::{TSEDOptions, calculate_tsed};
 use std::fs;
 use std::path::PathBuf;
 
@@ -273,7 +273,7 @@ fn check_overlaps(
     max_window_size: u32,
     size_tolerance: f64,
 ) -> anyhow::Result<()> {
-    use similarity_core::{find_overlaps_across_files_generic, OverlapOptions};
+    use similarity_core::{OverlapOptions, find_overlaps_across_files_generic};
     use std::collections::HashMap;
 
     println!("Checking for overlapping code...\n");

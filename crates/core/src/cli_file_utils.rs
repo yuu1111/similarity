@@ -13,16 +13,13 @@ pub fn collect_files(paths: &[String], extensions: &[&str]) -> anyhow::Result<Ve
 
         if path.is_file() {
             // If it's a file, check extension and add it
-            if let Some(ext) = path.extension() {
-                if let Some(ext_str) = ext.to_str() {
-                    if extensions.contains(&ext_str) {
-                        if let Ok(canonical) = path.canonicalize() {
-                            if visited.insert(canonical.clone()) {
-                                files.push(path.to_path_buf());
-                            }
-                        }
-                    }
-                }
+            if let Some(ext) = path.extension()
+                && let Some(ext_str) = ext.to_str()
+                && extensions.contains(&ext_str)
+                && let Ok(canonical) = path.canonicalize()
+                && visited.insert(canonical.clone())
+            {
+                files.push(path.to_path_buf());
             }
         } else if path.is_dir() {
             // If it's a directory, walk it respecting .gitignore
@@ -38,16 +35,13 @@ pub fn collect_files(paths: &[String], extensions: &[&str]) -> anyhow::Result<Ve
                 }
 
                 // Check extension
-                if let Some(ext) = entry_path.extension() {
-                    if let Some(ext_str) = ext.to_str() {
-                        if extensions.contains(&ext_str) {
-                            if let Ok(canonical) = entry_path.canonicalize() {
-                                if visited.insert(canonical.clone()) {
-                                    files.push(entry_path.to_path_buf());
-                                }
-                            }
-                        }
-                    }
+                if let Some(ext) = entry_path.extension()
+                    && let Some(ext_str) = ext.to_str()
+                    && extensions.contains(&ext_str)
+                    && let Ok(canonical) = entry_path.canonicalize()
+                    && visited.insert(canonical.clone())
+                {
+                    files.push(entry_path.to_path_buf());
                 }
             }
         } else {

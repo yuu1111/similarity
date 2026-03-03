@@ -1,4 +1,4 @@
-use similarity_core::{calculate_tsed, parse_and_convert_to_tree, TSEDOptions};
+use similarity_core::{TSEDOptions, calculate_tsed, parse_and_convert_to_tree};
 use std::rc::Rc;
 
 #[test]

@@ -9,7 +9,7 @@ pub mod shorthand_expander;
 pub mod specificity;
 
 pub use css_comparator::{
-    calculate_rule_similarity, compare_css_rules, CssRule, CssSimilarityResult, SerializableCssRule,
+    CssRule, CssSimilarityResult, SerializableCssRule, calculate_rule_similarity, compare_css_rules,
 };
 pub use css_rule_converter::{convert_to_css_rule, parse_css_to_rules};
 pub use duplicate_analyzer::{
@@ -17,6 +17,6 @@ pub use duplicate_analyzer::{
     SerializableDuplicateRule,
 };
 pub use parser::CssParser;
-pub use scss_flattener::{flatten_scss_rules, FlatRule};
+pub use scss_flattener::{FlatRule, flatten_scss_rules};
 pub use shorthand_expander::expand_shorthand_properties;
-pub use specificity::{calculate_specificity, SelectorAnalysis, Specificity};
+pub use specificity::{SelectorAnalysis, Specificity, calculate_specificity};

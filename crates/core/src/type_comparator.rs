@@ -1,7 +1,7 @@
 use crate::type_extractor::{TypeDefinition, TypeLiteralDefinition};
 use crate::type_normalizer::{
-    calculate_property_similarity, find_property_matches, normalize_type, NormalizationOptions,
-    NormalizedType, PropertyMatch,
+    NormalizationOptions, NormalizedType, PropertyMatch, calculate_property_similarity,
+    find_property_matches, normalize_type,
 };
 use std::collections::HashSet;
 

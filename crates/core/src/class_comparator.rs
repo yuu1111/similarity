@@ -125,11 +125,7 @@ fn calculate_name_similarity(name1: &str, name2: &str) -> f64 {
     let distance = levenshtein_distance(name1, name2);
     let max_len = name1.len().max(name2.len()) as f64;
 
-    if max_len > 0.0 {
-        1.0 - (distance as f64 / max_len)
-    } else {
-        1.0
-    }
+    if max_len > 0.0 { 1.0 - (distance as f64 / max_len) } else { 1.0 }
 }
 
 fn calculate_structural_similarity(

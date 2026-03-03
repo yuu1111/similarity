@@ -2,7 +2,7 @@
 
 use similarity_core::{
     language_parser::LanguageParser,
-    tsed::{calculate_tsed, TSEDOptions},
+    tsed::{TSEDOptions, calculate_tsed},
 };
 use similarity_rs::rust_parser::RustParser;
 
@@ -11,7 +11,7 @@ fn get_test_options() -> TSEDOptions {
     let mut options = TSEDOptions::default();
     options.apted_options.compare_values = true; // Rustでは値も比較する必要がある
     options.apted_options.rename_cost = 0.1; // 変数名の違いに寛容にする
-                                             // size_penalty = true (デフォルト) - 実際の使用環境と同じ条件でテスト
+    // size_penalty = true (デフォルト) - 実際の使用環境と同じ条件でテスト
     options
 }
 

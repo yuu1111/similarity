@@ -116,11 +116,7 @@ pub fn calculate_selector_similarity(selector1: &str, selector2: &str) -> f64 {
     let common = tokens1.intersection(&tokens2).count() as f64;
     let total = tokens1.union(&tokens2).count() as f64;
 
-    if total > 0.0 {
-        common / total
-    } else {
-        0.0
-    }
+    if total > 0.0 { common / total } else { 0.0 }
 }
 
 fn tokenize_selector(selector: &str) -> std::collections::HashSet<String> {
@@ -176,11 +172,7 @@ pub fn calculate_declaration_similarity(
         }
     }
 
-    if total_properties > 0.0 {
-        matching_properties / total_properties
-    } else {
-        0.0
-    }
+    if total_properties > 0.0 { matching_properties / total_properties } else { 0.0 }
 }
 
 fn calculate_value_similarity(value1: &str, value2: &str) -> f64 {

@@ -2,7 +2,7 @@ use oxc_ast::ast::*;
 use oxc_span::Span;
 
 use crate::parser::parse_and_convert_to_tree;
-use crate::tsed::{calculate_tsed, TSEDOptions};
+use crate::tsed::{TSEDOptions, calculate_tsed};
 
 type CrossFileSimilarityResult = Vec<(String, SimilarityResult, String)>;
 
@@ -190,29 +190,29 @@ fn extract_from_statement(stmt: &Statement, ctx: &mut ExtractionContext) {
         }
         Statement::VariableDeclaration(var_decl) => {
             for decl in &var_decl.declarations {
-                if let Some(Expression::ArrowFunctionExpression(arrow)) = &decl.init {
-                    if let BindingPattern::BindingIdentifier(ident) = &decl.id {
-                        let params = extract_parameters(&arrow.params);
-                        let arrow_name = ident.name.to_string();
-                        ctx.functions.push(FunctionDefinition {
-                            name: arrow_name.clone(),
-                            function_type: FunctionType::Arrow,
-                            parameters: params,
-                            body_span: arrow.span,
-                            start_line: get_line_number(arrow.span.start, ctx.source_text),
-                            end_line: get_line_number(arrow.span.end, ctx.source_text),
-                            class_name: None,
-                            parent_function: ctx.parent_function.clone(),
-                            node_count: count_function_nodes(arrow.span, ctx.source_text),
-                        });
+                if let Some(Expression::ArrowFunctionExpression(arrow)) = &decl.init
+                    && let BindingPattern::BindingIdentifier(ident) = &decl.id
+                {
+                    let params = extract_parameters(&arrow.params);
+                    let arrow_name = ident.name.to_string();
+                    ctx.functions.push(FunctionDefinition {
+                        name: arrow_name.clone(),
+                        function_type: FunctionType::Arrow,
+                        parameters: params,
+                        body_span: arrow.span,
+                        start_line: get_line_number(arrow.span.start, ctx.source_text),
+                        end_line: get_line_number(arrow.span.end, ctx.source_text),
+                        class_name: None,
+                        parent_function: ctx.parent_function.clone(),
+                        node_count: count_function_nodes(arrow.span, ctx.source_text),
+                    });
 
-                        // Extract nested functions within arrow function body
-                        if !arrow.expression {
-                            let saved_parent = ctx.parent_function.clone();
-                            ctx.parent_function = Some(arrow_name);
-                            extract_from_function_body(&arrow.body, ctx);
-                            ctx.parent_function = saved_parent;
-                        }
+                    // Extract nested functions within arrow function body
+                    if !arrow.expression {
+                        let saved_parent = ctx.parent_function.clone();
+                        ctx.parent_function = Some(arrow_name);
+                        extract_from_function_body(&arrow.body, ctx);
+                        ctx.parent_function = saved_parent;
                     }
                 }
             }
@@ -335,29 +335,29 @@ fn extract_from_declaration(decl: &Declaration, ctx: &mut ExtractionContext) {
         }
         Declaration::VariableDeclaration(var) => {
             for decl in &var.declarations {
-                if let Some(Expression::ArrowFunctionExpression(arrow)) = &decl.init {
-                    if let BindingPattern::BindingIdentifier(ident) = &decl.id {
-                        let params = extract_parameters(&arrow.params);
-                        let arrow_name = ident.name.to_string();
-                        ctx.functions.push(FunctionDefinition {
-                            name: arrow_name.clone(),
-                            function_type: FunctionType::Arrow,
-                            parameters: params,
-                            body_span: arrow.span,
-                            start_line: get_line_number(arrow.span.start, ctx.source_text),
-                            end_line: get_line_number(arrow.span.end, ctx.source_text),
-                            class_name: None,
-                            parent_function: ctx.parent_function.clone(),
-                            node_count: count_function_nodes(arrow.span, ctx.source_text),
-                        });
+                if let Some(Expression::ArrowFunctionExpression(arrow)) = &decl.init
+                    && let BindingPattern::BindingIdentifier(ident) = &decl.id
+                {
+                    let params = extract_parameters(&arrow.params);
+                    let arrow_name = ident.name.to_string();
+                    ctx.functions.push(FunctionDefinition {
+                        name: arrow_name.clone(),
+                        function_type: FunctionType::Arrow,
+                        parameters: params,
+                        body_span: arrow.span,
+                        start_line: get_line_number(arrow.span.start, ctx.source_text),
+                        end_line: get_line_number(arrow.span.end, ctx.source_text),
+                        class_name: None,
+                        parent_function: ctx.parent_function.clone(),
+                        node_count: count_function_nodes(arrow.span, ctx.source_text),
+                    });
 
-                        // Extract nested functions within arrow function body
-                        if !arrow.expression {
-                            let saved_parent = ctx.parent_function.clone();
-                            ctx.parent_function = Some(arrow_name);
-                            extract_from_function_body(&arrow.body, ctx);
-                            ctx.parent_function = saved_parent;
-                        }
+                    // Extract nested functions within arrow function body
+                    if !arrow.expression {
+                        let saved_parent = ctx.parent_function.clone();
+                        ctx.parent_function = Some(arrow_name);
+                        extract_from_function_body(&arrow.body, ctx);
+                        ctx.parent_function = saved_parent;
                     }
                 }
             }

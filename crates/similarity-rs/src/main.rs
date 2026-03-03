@@ -90,7 +90,7 @@ struct Cli {
     /// Disable function similarity checking
     #[arg(long = "no-functions")]
     no_functions: bool,
-    
+
     /// Use new generalized structure comparison framework (experimental)
     #[arg(long)]
     use_structure_comparison: bool,
@@ -105,7 +105,9 @@ fn main() -> Result<()> {
 
     // Validate that at least one analyzer is enabled
     if !functions_enabled && !types_enabled && !overlap_enabled {
-        eprintln!("Error: At least one analyzer must be enabled. Use --experimental-types to enable type checking, --experimental-overlap for overlap detection, or remove --no-functions.");
+        eprintln!(
+            "Error: At least one analyzer must be enabled. Use --experimental-types to enable type checking, --experimental-overlap for overlap detection, or remove --no-functions."
+        );
         return Err(anyhow::anyhow!("No analyzer enabled"));
     }
 
@@ -194,7 +196,7 @@ fn check_overlaps(
 ) -> anyhow::Result<usize> {
     use crate::rust_parser::RustParser;
     use ignore::WalkBuilder;
-    use similarity_core::{find_overlaps_across_files_generic, OverlapOptions};
+    use similarity_core::{OverlapOptions, find_overlaps_across_files_generic};
     use std::collections::{HashMap, HashSet};
     use std::fs;
     use std::path::Path;
@@ -213,16 +215,13 @@ fn check_overlaps(
 
         if path.is_file() {
             // If it's a file, check extension and add it
-            if let Some(ext) = path.extension() {
-                if let Some(ext_str) = ext.to_str() {
-                    if exts.contains(&ext_str) {
-                        if let Ok(canonical) = path.canonicalize() {
-                            if visited.insert(canonical.clone()) {
-                                files.push(path.to_path_buf());
-                            }
-                        }
-                    }
-                }
+            if let Some(ext) = path.extension()
+                && let Some(ext_str) = ext.to_str()
+                && exts.contains(&ext_str)
+                && let Ok(canonical) = path.canonicalize()
+                && visited.insert(canonical.clone())
+            {
+                files.push(path.to_path_buf());
             }
         } else if path.is_dir() {
             // If it's a directory, walk it respecting .gitignore
@@ -238,23 +237,22 @@ fn check_overlaps(
                 }
 
                 // Check if path should be excluded
-                if let Some(ref matcher) = exclude_matcher {
-                    if matcher.is_match(entry_path) {
-                        continue;
-                    }
+                if let Some(ref matcher) = exclude_matcher
+                    && matcher.is_match(entry_path)
+                {
+                    continue;
                 }
 
                 // Check extension
-                if let Some(ext) = entry_path.extension() {
-                    if let Some(ext_str) = ext.to_str() {
-                        if exts.contains(&ext_str) {
-                            // Get canonical path to avoid duplicates
-                            if let Ok(canonical) = entry_path.canonicalize() {
-                                if visited.insert(canonical.clone()) {
-                                    files.push(entry_path.to_path_buf());
-                                }
-                            }
-                        }
+                if let Some(ext) = entry_path.extension()
+                    && let Some(ext_str) = ext.to_str()
+                    && exts.contains(&ext_str)
+                {
+                    // Get canonical path to avoid duplicates
+                    if let Ok(canonical) = entry_path.canonicalize()
+                        && visited.insert(canonical.clone())
+                    {
+                        files.push(entry_path.to_path_buf());
                     }
                 }
             }
@@ -331,26 +329,25 @@ fn check_overlaps(
 
             if print {
                 // Extract and display the overlapping code
-                if let Some(source_content) = file_contents.get(&overlap_with_files.source_file) {
-                    if let Some(target_content) = file_contents.get(&overlap_with_files.target_file)
-                    {
-                        println!("\n\x1b[36m--- Source Code ---\x1b[0m");
-                        if let Ok(source_segment) = extract_code_lines(
-                            source_content,
-                            overlap.source_lines.0,
-                            overlap.source_lines.1,
-                        ) {
-                            println!("{source_segment}");
-                        }
+                if let Some(source_content) = file_contents.get(&overlap_with_files.source_file)
+                    && let Some(target_content) = file_contents.get(&overlap_with_files.target_file)
+                {
+                    println!("\n\x1b[36m--- Source Code ---\x1b[0m");
+                    if let Ok(source_segment) = extract_code_lines(
+                        source_content,
+                        overlap.source_lines.0,
+                        overlap.source_lines.1,
+                    ) {
+                        println!("{source_segment}");
+                    }
 
-                        println!("\n\x1b[36m--- Target Code ---\x1b[0m");
-                        if let Ok(target_segment) = extract_code_lines(
-                            target_content,
-                            overlap.target_lines.0,
-                            overlap.target_lines.1,
-                        ) {
-                            println!("{target_segment}");
-                        }
+                    println!("\n\x1b[36m--- Target Code ---\x1b[0m");
+                    if let Ok(target_segment) = extract_code_lines(
+                        target_content,
+                        overlap.target_lines.0,
+                        overlap.target_lines.1,
+                    ) {
+                        println!("{target_segment}");
                     }
                 }
             }

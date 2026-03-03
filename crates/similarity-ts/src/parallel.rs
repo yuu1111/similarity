@@ -1,7 +1,7 @@
 use rayon::prelude::*;
 use similarity_core::{
-    extract_functions, find_similar_functions_fast, find_similar_functions_in_file,
-    FastSimilarityOptions, FunctionDefinition, SimilarityResult, TSEDOptions,
+    FastSimilarityOptions, FunctionDefinition, SimilarityResult, TSEDOptions, extract_functions,
+    find_similar_functions_fast, find_similar_functions_in_file,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -63,11 +63,7 @@ pub fn check_within_file_duplicates_parallel(
                 };
 
                 similar_pairs.and_then(|pairs| {
-                    if pairs.is_empty() {
-                        None
-                    } else {
-                        Some((file.clone(), pairs))
-                    }
+                    if pairs.is_empty() { None } else { Some((file.clone(), pairs)) }
                 })
             }
             Err(_) => None,

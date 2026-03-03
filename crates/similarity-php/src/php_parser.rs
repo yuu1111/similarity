@@ -54,13 +54,12 @@ impl PhpParser {
         let mut current_namespace: Option<String> = None;
         let mut cursor = node.walk();
         for child in node.children(&mut cursor) {
-            if child.kind() == "namespace_definition" {
-                if let Some(name_node) = child.child_by_field_name("name") {
-                    if let Ok(ns_name) = name_node.utf8_text(source.as_bytes()) {
-                        current_namespace = Some(ns_name.to_string());
-                        break;
-                    }
-                }
+            if child.kind() == "namespace_definition"
+                && let Some(name_node) = child.child_by_field_name("name")
+                && let Ok(ns_name) = name_node.utf8_text(source.as_bytes())
+            {
+                current_namespace = Some(ns_name.to_string());
+                break;
             }
         }
 
@@ -73,98 +72,94 @@ impl PhpParser {
         ) {
             match node.kind() {
                 "function_definition" => {
-                    if let Some(name_node) = node.child_by_field_name("name") {
-                        if let Ok(name) = name_node.utf8_text(source.as_bytes()) {
-                            let parameters_node = node.child_by_field_name("parameters");
-                            let body_node = node.child_by_field_name("body");
+                    if let Some(name_node) = node.child_by_field_name("name")
+                        && let Ok(name) = name_node.utf8_text(source.as_bytes())
+                    {
+                        let parameters_node = node.child_by_field_name("parameters");
+                        let body_node = node.child_by_field_name("body");
 
-                            let params = extract_params(parameters_node, source);
-                            let full_name = if let Some(ns) = namespace {
-                                format!("{ns}\\{name}")
-                            } else {
-                                name.to_string()
-                            };
+                        let params = extract_params(parameters_node, source);
+                        let full_name = if let Some(ns) = namespace {
+                            format!("{ns}\\{name}")
+                        } else {
+                            name.to_string()
+                        };
 
-                            functions.push(GenericFunctionDef {
-                                name: full_name,
-                                start_line: node.start_position().row as u32 + 1,
-                                end_line: node.end_position().row as u32 + 1,
-                                body_start_line: body_node
-                                    .map(|n| n.start_position().row as u32 + 1)
-                                    .unwrap_or(0),
-                                body_end_line: body_node
-                                    .map(|n| n.end_position().row as u32 + 1)
-                                    .unwrap_or(0),
-                                parameters: params,
-                                is_method: class_name.is_some(),
-                                class_name: class_name.map(|s| s.to_string()),
-                                is_async: false, // PHP doesn't have async/await syntax
-                                is_generator: is_generator_function(node, source),
-                                decorators: Vec::new(), // PHP doesn't have decorators like Python
-                            });
-                        }
+                        functions.push(GenericFunctionDef {
+                            name: full_name,
+                            start_line: node.start_position().row as u32 + 1,
+                            end_line: node.end_position().row as u32 + 1,
+                            body_start_line: body_node
+                                .map(|n| n.start_position().row as u32 + 1)
+                                .unwrap_or(0),
+                            body_end_line: body_node
+                                .map(|n| n.end_position().row as u32 + 1)
+                                .unwrap_or(0),
+                            parameters: params,
+                            is_method: class_name.is_some(),
+                            class_name: class_name.map(|s| s.to_string()),
+                            is_async: false, // PHP doesn't have async/await syntax
+                            is_generator: is_generator_function(node, source),
+                            decorators: Vec::new(), // PHP doesn't have decorators like Python
+                        });
                     }
                 }
                 "method_declaration" => {
-                    if let Some(name_node) = node.child_by_field_name("name") {
-                        if let Ok(name) = name_node.utf8_text(source.as_bytes()) {
-                            let parameters_node = node.child_by_field_name("parameters");
-                            let body_node = node.child_by_field_name("body");
+                    if let Some(name_node) = node.child_by_field_name("name")
+                        && let Ok(name) = name_node.utf8_text(source.as_bytes())
+                    {
+                        let parameters_node = node.child_by_field_name("parameters");
+                        let body_node = node.child_by_field_name("body");
 
-                            let params = extract_params(parameters_node, source);
-                            let visibility = extract_visibility(node, source);
-                            let is_static = is_static_method(node, source);
-                            let is_abstract = is_abstract_method(node, source);
+                        let params = extract_params(parameters_node, source);
+                        let visibility = extract_visibility(node, source);
+                        let is_static = is_static_method(node, source);
+                        let is_abstract = is_abstract_method(node, source);
 
-                            let method_name = format!("{}::{}", class_name.unwrap_or(""), name);
+                        let method_name = format!("{}::{}", class_name.unwrap_or(""), name);
 
-                            functions.push(GenericFunctionDef {
-                                name: method_name,
-                                start_line: node.start_position().row as u32 + 1,
-                                end_line: node.end_position().row as u32 + 1,
-                                body_start_line: body_node
-                                    .map(|n| n.start_position().row as u32 + 1)
-                                    .unwrap_or(0),
-                                body_end_line: body_node
-                                    .map(|n| n.end_position().row as u32 + 1)
-                                    .unwrap_or(0),
-                                parameters: params,
-                                is_method: true,
-                                class_name: class_name.map(|s| s.to_string()),
-                                is_async: false,
-                                is_generator: is_generator_function(node, source),
-                                decorators: vec![
-                                    visibility,
-                                    if is_static { "static".to_string() } else { "".to_string() },
-                                    if is_abstract {
-                                        "abstract".to_string()
-                                    } else {
-                                        "".to_string()
-                                    },
-                                ]
-                                .into_iter()
-                                .filter(|s| !s.is_empty())
-                                .collect(),
-                            });
-                        }
+                        functions.push(GenericFunctionDef {
+                            name: method_name,
+                            start_line: node.start_position().row as u32 + 1,
+                            end_line: node.end_position().row as u32 + 1,
+                            body_start_line: body_node
+                                .map(|n| n.start_position().row as u32 + 1)
+                                .unwrap_or(0),
+                            body_end_line: body_node
+                                .map(|n| n.end_position().row as u32 + 1)
+                                .unwrap_or(0),
+                            parameters: params,
+                            is_method: true,
+                            class_name: class_name.map(|s| s.to_string()),
+                            is_async: false,
+                            is_generator: is_generator_function(node, source),
+                            decorators: vec![
+                                visibility,
+                                if is_static { "static".to_string() } else { "".to_string() },
+                                if is_abstract { "abstract".to_string() } else { "".to_string() },
+                            ]
+                            .into_iter()
+                            .filter(|s| !s.is_empty())
+                            .collect(),
+                        });
                     }
                 }
                 "class_declaration" => {
-                    if let Some(name_node) = node.child_by_field_name("name") {
-                        if let Ok(name) = name_node.utf8_text(source.as_bytes()) {
-                            let mut subcursor = node.walk();
-                            for child in node.children(&mut subcursor) {
-                                visit_node(child, source, functions, Some(name), namespace);
-                            }
+                    if let Some(name_node) = node.child_by_field_name("name")
+                        && let Ok(name) = name_node.utf8_text(source.as_bytes())
+                    {
+                        let mut subcursor = node.walk();
+                        for child in node.children(&mut subcursor) {
+                            visit_node(child, source, functions, Some(name), namespace);
                         }
                     }
                 }
                 "namespace_definition" => {
                     // For namespace without braces (like "namespace App\Controllers;")
-                    if let Some(name_node) = node.child_by_field_name("name") {
-                        if let Ok(_ns_name) = name_node.utf8_text(source.as_bytes()) {
-                            // Continue traversing sibling nodes with this namespace
-                        }
+                    if let Some(name_node) = node.child_by_field_name("name")
+                        && let Ok(_ns_name) = name_node.utf8_text(source.as_bytes())
+                    {
+                        // Continue traversing sibling nodes with this namespace
                     }
                 }
                 "namespace_use_declaration" => {
@@ -180,10 +175,10 @@ impl PhpParser {
         }
 
         fn is_generator_function(node: Node, source: &str) -> bool {
-            if let Some(body) = node.child_by_field_name("body") {
-                if let Ok(body_text) = body.utf8_text(source.as_bytes()) {
-                    return body_text.contains("yield");
-                }
+            if let Some(body) = node.child_by_field_name("body")
+                && let Ok(body_text) = body.utf8_text(source.as_bytes())
+            {
+                return body_text.contains("yield");
             }
             false
         }
@@ -191,10 +186,10 @@ impl PhpParser {
         fn extract_visibility(node: Node, source: &str) -> String {
             let mut cursor = node.walk();
             for child in node.children(&mut cursor) {
-                if child.kind() == "visibility_modifier" {
-                    if let Ok(visibility) = child.utf8_text(source.as_bytes()) {
-                        return visibility.to_string();
-                    }
+                if child.kind() == "visibility_modifier"
+                    && let Ok(visibility) = child.utf8_text(source.as_bytes())
+                {
+                    return visibility.to_string();
                 }
             }
             "public".to_string() // Default visibility in PHP
@@ -228,24 +223,24 @@ impl PhpParser {
                 for child in node.children(&mut cursor) {
                     match child.kind() {
                         "simple_parameter" => {
-                            if let Some(var_node) = child.child_by_field_name("name") {
-                                if let Ok(param_text) = var_node.utf8_text(source.as_bytes()) {
-                                    params.push(param_text.to_string());
-                                }
+                            if let Some(var_node) = child.child_by_field_name("name")
+                                && let Ok(param_text) = var_node.utf8_text(source.as_bytes())
+                            {
+                                params.push(param_text.to_string());
                             }
                         }
                         "typed_parameter" => {
-                            if let Some(var_node) = child.child_by_field_name("name") {
-                                if let Ok(param_text) = var_node.utf8_text(source.as_bytes()) {
-                                    params.push(param_text.to_string());
-                                }
+                            if let Some(var_node) = child.child_by_field_name("name")
+                                && let Ok(param_text) = var_node.utf8_text(source.as_bytes())
+                            {
+                                params.push(param_text.to_string());
                             }
                         }
                         "variadic_parameter" => {
-                            if let Some(var_node) = child.child_by_field_name("name") {
-                                if let Ok(param_text) = var_node.utf8_text(source.as_bytes()) {
-                                    params.push(format!("..{param_text}"));
-                                }
+                            if let Some(var_node) = child.child_by_field_name("name")
+                                && let Ok(param_text) = var_node.utf8_text(source.as_bytes())
+                            {
+                                params.push(format!("..{param_text}"));
                             }
                         }
                         _ => {}
@@ -310,42 +305,42 @@ impl LanguageParser for PhpParser {
         fn visit_node_for_types(node: Node, source: &str, types: &mut Vec<GenericTypeDef>) {
             match node.kind() {
                 "class_declaration" => {
-                    if let Some(name_node) = node.child_by_field_name("name") {
-                        if let Ok(name) = name_node.utf8_text(source.as_bytes()) {
-                            types.push(GenericTypeDef {
-                                name: name.to_string(),
-                                kind: "class".to_string(),
-                                start_line: node.start_position().row as u32 + 1,
-                                end_line: node.end_position().row as u32 + 1,
-                                fields: extract_class_properties(node, source),
-                            });
-                        }
+                    if let Some(name_node) = node.child_by_field_name("name")
+                        && let Ok(name) = name_node.utf8_text(source.as_bytes())
+                    {
+                        types.push(GenericTypeDef {
+                            name: name.to_string(),
+                            kind: "class".to_string(),
+                            start_line: node.start_position().row as u32 + 1,
+                            end_line: node.end_position().row as u32 + 1,
+                            fields: extract_class_properties(node, source),
+                        });
                     }
                 }
                 "interface_declaration" => {
-                    if let Some(name_node) = node.child_by_field_name("name") {
-                        if let Ok(name) = name_node.utf8_text(source.as_bytes()) {
-                            types.push(GenericTypeDef {
-                                name: name.to_string(),
-                                kind: "interface".to_string(),
-                                start_line: node.start_position().row as u32 + 1,
-                                end_line: node.end_position().row as u32 + 1,
-                                fields: extract_interface_methods(node, source),
-                            });
-                        }
+                    if let Some(name_node) = node.child_by_field_name("name")
+                        && let Ok(name) = name_node.utf8_text(source.as_bytes())
+                    {
+                        types.push(GenericTypeDef {
+                            name: name.to_string(),
+                            kind: "interface".to_string(),
+                            start_line: node.start_position().row as u32 + 1,
+                            end_line: node.end_position().row as u32 + 1,
+                            fields: extract_interface_methods(node, source),
+                        });
                     }
                 }
                 "trait_declaration" => {
-                    if let Some(name_node) = node.child_by_field_name("name") {
-                        if let Ok(name) = name_node.utf8_text(source.as_bytes()) {
-                            types.push(GenericTypeDef {
-                                name: name.to_string(),
-                                kind: "trait".to_string(),
-                                start_line: node.start_position().row as u32 + 1,
-                                end_line: node.end_position().row as u32 + 1,
-                                fields: extract_trait_methods(node, source),
-                            });
-                        }
+                    if let Some(name_node) = node.child_by_field_name("name")
+                        && let Ok(name) = name_node.utf8_text(source.as_bytes())
+                    {
+                        types.push(GenericTypeDef {
+                            name: name.to_string(),
+                            kind: "trait".to_string(),
+                            start_line: node.start_position().row as u32 + 1,
+                            end_line: node.end_position().row as u32 + 1,
+                            fields: extract_trait_methods(node, source),
+                        });
                     }
                 }
                 _ => {}
@@ -366,10 +361,10 @@ impl LanguageParser for PhpParser {
                     if child.kind() == "property_declaration" {
                         let mut prop_cursor = child.walk();
                         for prop_child in child.children(&mut prop_cursor) {
-                            if prop_child.kind() == "variable_name" {
-                                if let Ok(prop_name) = prop_child.utf8_text(source.as_bytes()) {
-                                    properties.push(prop_name.to_string());
-                                }
+                            if prop_child.kind() == "variable_name"
+                                && let Ok(prop_name) = prop_child.utf8_text(source.as_bytes())
+                            {
+                                properties.push(prop_name.to_string());
                             }
                         }
                     }
@@ -385,12 +380,11 @@ impl LanguageParser for PhpParser {
             if let Some(body) = node.child_by_field_name("body") {
                 let mut cursor = body.walk();
                 for child in body.children(&mut cursor) {
-                    if child.kind() == "method_declaration" {
-                        if let Some(name_node) = child.child_by_field_name("name") {
-                            if let Ok(method_name) = name_node.utf8_text(source.as_bytes()) {
-                                methods.push(method_name.to_string());
-                            }
-                        }
+                    if child.kind() == "method_declaration"
+                        && let Some(name_node) = child.child_by_field_name("name")
+                        && let Ok(method_name) = name_node.utf8_text(source.as_bytes())
+                    {
+                        methods.push(method_name.to_string());
                     }
                 }
             }
@@ -404,12 +398,11 @@ impl LanguageParser for PhpParser {
             if let Some(body) = node.child_by_field_name("body") {
                 let mut cursor = body.walk();
                 for child in body.children(&mut cursor) {
-                    if child.kind() == "method_declaration" {
-                        if let Some(name_node) = child.child_by_field_name("name") {
-                            if let Ok(method_name) = name_node.utf8_text(source.as_bytes()) {
-                                methods.push(method_name.to_string());
-                            }
-                        }
+                    if child.kind() == "method_declaration"
+                        && let Some(name_node) = child.child_by_field_name("name")
+                        && let Ok(method_name) = name_node.utf8_text(source.as_bytes())
+                    {
+                        methods.push(method_name.to_string());
                     }
                 }
             }

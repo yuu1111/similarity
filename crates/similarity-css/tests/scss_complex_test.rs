@@ -1,6 +1,6 @@
 use similarity_core::language_parser::LanguageParser;
 use similarity_css::{
-    calculate_rule_similarity, convert_to_css_rule, CssParser, DuplicateAnalyzer,
+    CssParser, DuplicateAnalyzer, calculate_rule_similarity, convert_to_css_rule,
 };
 
 #[test]

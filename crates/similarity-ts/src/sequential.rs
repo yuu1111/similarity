@@ -1,7 +1,7 @@
 use crate::parallel::FileData;
 use similarity_core::{
-    compare_functions, extract_functions, find_similar_functions_fast,
-    find_similar_functions_in_file, FastSimilarityOptions, SimilarityResult, TSEDOptions,
+    FastSimilarityOptions, SimilarityResult, TSEDOptions, compare_functions, extract_functions,
+    find_similar_functions_fast, find_similar_functions_in_file,
 };
 use std::fs;
 use std::path::PathBuf;
@@ -55,11 +55,7 @@ pub fn check_within_file_duplicates_sequential(
                 };
 
                 similar_pairs.and_then(|pairs| {
-                    if pairs.is_empty() {
-                        None
-                    } else {
-                        Some((file.clone(), pairs))
-                    }
+                    if pairs.is_empty() { None } else { Some((file.clone(), pairs)) }
                 })
             }
             Err(_) => None,
@@ -91,17 +87,15 @@ pub fn check_cross_file_duplicates_sequential(
             let (file2, content2, func2) = &all_functions[j];
 
             // Only check across different files
-            if file1 != file2 {
-                if let Ok(similarity) = compare_functions(func1, func2, content1, content2, options)
-                {
-                    if similarity >= threshold {
-                        results.push((
-                            file1.clone(),
-                            SimilarityResult::new(func1.clone(), func2.clone(), similarity),
-                            file2.clone(),
-                        ));
-                    }
-                }
+            if file1 != file2
+                && let Ok(similarity) = compare_functions(func1, func2, content1, content2, options)
+                && similarity >= threshold
+            {
+                results.push((
+                    file1.clone(),
+                    SimilarityResult::new(func1.clone(), func2.clone(), similarity),
+                    file2.clone(),
+                ));
             }
         }
     }
