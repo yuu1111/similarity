@@ -1,6 +1,6 @@
 //! 形態素解析機能のテスト例
 //!
-//! このサンプルは、Vibratoを使った形態素解析による日本語テキストの類似性検出をデモンストレーションします。
+//! このサンプルは、Linderaを使った形態素解析による日本語テキストの類似性検出をデモンストレーションします。
 //!
 //! 実行方法:
 //! ```bash
@@ -20,10 +20,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Err(e) => {
             println!("⚠ 形態素解析器の初期化に失敗しました: {e}");
-            println!("辞書ファイルが見つからない可能性があります。");
-            println!("以下のいずれかの方法で辞書を準備してください:");
-            println!("1. MeCab辞書をインストール: sudo apt-get install mecab-ipadic-utf8");
-            println!("2. 辞書パスを指定: --morphological-dict /path/to/dict");
+            println!("埋め込み辞書の読み込みに失敗した可能性があります。");
             println!("\n従来の類似性検出のみでテストを続行します...\n");
         }
     }

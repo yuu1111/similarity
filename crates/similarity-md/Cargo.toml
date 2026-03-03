@@ -28,9 +28,6 @@ serde_json = "1.0"
 lindera = {version = "2.2", features = ["embed-ipadic"]}
 walkdir = "2.5"
 
-[features]
-default = []
-
 [dev-dependencies]
 assert_cmd = "2.0"
 criterion = "0.5"

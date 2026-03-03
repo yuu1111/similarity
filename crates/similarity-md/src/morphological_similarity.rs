@@ -1,11 +1,9 @@
 use anyhow::{Context, Result};
+use lindera::dictionary::load_dictionary;
+use lindera::mode::Mode;
+use lindera::segmenter::Segmenter;
+use lindera::tokenizer::Tokenizer;
 use std::collections::HashMap;
-use std::fs::File;
-use std::path::Path;
-use vibrato::{Dictionary, Tokenizer};
-
-#[cfg(feature = "zstd-support")]
-use zstd::Decoder;
 
 /// 形態素解析を使った類似性計算器
 pub struct MorphologicalSimilarityCalculator {
@@ -16,100 +14,49 @@ impl MorphologicalSimilarityCalculator {
     /// 新しい形態素解析類似性計算器を作成
     ///
     /// # Arguments
-    /// * `dict_path` - 辞書ファイルのパス（Vibratoの辞書）
-    pub fn new(dict_path: Option<&str>) -> Result<Self> {
-        let dict = if let Some(path) = dict_path {
-            Self::load_dictionary(path)?
-        } else {
-            // デフォルトの辞書パスを試行
-            let default_paths = [
-                "/usr/share/mecab/dic/ipadic/system.dic",
-                "/usr/share/mecab/dic/ipadic/system.dic.zst",
-                "/opt/homebrew/lib/mecab/dic/ipadic/system.dic",
-                "/opt/homebrew/lib/mecab/dic/ipadic/system.dic.zst",
-                "./dict/system.dic",
-                "./dict/system.dic.zst",
-                "./system.dic",
-                "./system.dic.zst",
-                "./ipadic-mecab-2_7_0/system.dic.zst",
-            ];
-
-            let mut dict = None;
-            for path in &default_paths {
-                if Path::new(path).exists() {
-                    if let Ok(d) = Self::load_dictionary(path) {
-                        dict = Some(d);
-                        break;
-                    }
-                }
-            }
-
-            dict.context("形態素解析辞書が見つかりません。辞書パスを指定してください。\n利用可能な辞書をダウンロードするには:\nwget https://github.com/daac-tools/vibrato/releases/download/v0.5.0/ipadic-mecab-2_7_0.tar.xz\ntar xf ipadic-mecab-2_7_0.tar.xz")?
-        };
-
-        let tokenizer = Tokenizer::new(dict);
+    /// * `_dict_path` - 辞書ファイルのパス(現在は埋め込み辞書を使用するため無視される)
+    pub fn new(_dict_path: Option<&str>) -> Result<Self> {
+        let dictionary = load_dictionary("embedded://ipadic")
+            .map_err(|e| anyhow::anyhow!("{}", e))
+            .context("IPAdic埋め込み辞書の読み込みに失敗しました")?;
+        let segmenter = Segmenter::new(Mode::Normal, dictionary, None);
+        let tokenizer = Tokenizer::new(segmenter);
 
         Ok(Self { tokenizer })
     }
 
-    /// 辞書ファイルを読み込む（圧縮ファイルにも対応）
-    fn load_dictionary(path: &str) -> Result<Dictionary> {
-        let file =
-            File::open(path).with_context(|| format!("辞書ファイルを開けませんでした: {path}"))?;
-
-        // .zstファイルの場合は解凍して読み込み
-        if path.ends_with(".zst") {
-            #[cfg(feature = "zstd-support")]
-            {
-                let decoder = Decoder::new(file)
-                    .with_context(|| format!("zstdデコーダーの初期化に失敗しました: {path}"))?;
-                Dictionary::read(decoder)
-                    .with_context(|| format!("圧縮辞書ファイルの読み込みに失敗しました: {path}"))
-            }
-            #[cfg(not(feature = "zstd-support"))]
-            {
-                Err(anyhow::anyhow!(
-                    "圧縮辞書ファイル（.zst）を読み込むには、zstd-supportフィーチャーを有効にしてください: {}",
-                    path
-                ))
-            }
-        } else {
-            Dictionary::read(file)
-                .with_context(|| format!("辞書ファイルの読み込みに失敗しました: {path}"))
-        }
-    }
-
     /// テキストを形態素に分解
     pub fn tokenize(&self, text: &str) -> Result<Vec<MorphemeToken>> {
-        let mut worker = self.tokenizer.new_worker();
-        worker.reset_sentence(text);
-        worker.tokenize();
+        let mut tokens = self
+            .tokenizer
+            .tokenize(text)
+            .map_err(|e| anyhow::anyhow!("{}", e))
+            .context("形態素解析に失敗しました")?;
 
-        let mut tokens = Vec::new();
+        let mut result = Vec::new();
 
-        for i in 0..worker.num_tokens() {
-            let token = worker.token(i);
-            let surface = token.surface();
-            let features = token.feature();
+        for token in tokens.iter_mut() {
+            let surface = token.surface.to_string();
+            let details = token.details();
 
-            // 品詞情報を解析
-            let pos_parts: Vec<&str> = features.split(',').collect();
-            let pos_main = pos_parts.first().unwrap_or(&"").to_string();
-            let pos_sub1 = pos_parts.get(1).unwrap_or(&"").to_string();
-            let pos_sub2 = pos_parts.get(2).unwrap_or(&"").to_string();
-            let base_form = pos_parts.get(6).unwrap_or(&surface).to_string();
+            // IPAdic: 品詞,品詞細分類1,品詞細分類2,品詞細分類3,活用型,活用形,原形,読み,発音
+            let pos_main = details.first().unwrap_or(&"").to_string();
+            let pos_sub1 = details.get(1).unwrap_or(&"").to_string();
+            let pos_sub2 = details.get(2).unwrap_or(&"").to_string();
+            let base_form = details.get(6).unwrap_or(&surface.as_str()).to_string();
+            let features = details.join(",");
 
-            tokens.push(MorphemeToken {
-                surface: surface.to_string(),
+            result.push(MorphemeToken {
+                surface,
                 base_form,
                 pos_main,
                 pos_sub1,
                 pos_sub2,
-                features: features.to_string(),
+                features,
             });
         }
 
-        Ok(tokens)
+        Ok(result)
     }
 
     /// 形態素ベースの類似性を計算
@@ -117,7 +64,7 @@ impl MorphologicalSimilarityCalculator {
         let tokens1 = self.tokenize(text1)?;
         let tokens2 = self.tokenize(text2)?;
 
-        // 内容語（名詞、動詞、形容詞、副詞）のみを抽出
+        // 内容語(名詞、動詞、形容詞、副詞)のみを抽出
         let content_words1 = self.extract_content_words(&tokens1);
         let content_words2 = self.extract_content_words(&tokens2);
 
@@ -147,7 +94,7 @@ impl MorphologicalSimilarityCalculator {
         Ok(PosSimilarity { noun_similarity, verb_similarity, adjective_similarity })
     }
 
-    /// 内容語を抽出（名詞、動詞、形容詞、副詞）
+    /// 内容語を抽出(名詞、動詞、形容詞、副詞)
     fn extract_content_words(&self, tokens: &[MorphemeToken]) -> Vec<String> {
         tokens
             .iter()
@@ -201,7 +148,7 @@ impl MorphologicalSimilarityCalculator {
         let freq1 = self.calculate_word_frequency(&content_words1);
         let freq2 = self.calculate_word_frequency(&content_words2);
 
-        // コーパス全体での語の出現頻度を計算（簡易版IDF）
+        // コーパス全体での語の出現頻度を計算(簡易版IDF)
         let corpus_freq = self.calculate_corpus_frequency(corpus)?;
 
         // 重み付きコサイン類似度を計算
@@ -332,19 +279,15 @@ impl PosSimilarity {
 mod tests {
     use super::*;
 
-    // 注意: テストを実行するには適切な辞書ファイルが必要です
     #[test]
-    #[ignore] // 辞書ファイルが必要なためデフォルトでは無視
     fn test_tokenize() {
         let calculator = MorphologicalSimilarityCalculator::new(None).unwrap();
         let tokens = calculator.tokenize("これは日本語のテストです。").unwrap();
 
         assert!(!tokens.is_empty());
-        // 実際のトークン数は辞書によって異なる可能性があります
     }
 
     #[test]
-    #[ignore] // 辞書ファイルが必要なためデフォルトでは無視
     fn test_morpheme_similarity() {
         let calculator = MorphologicalSimilarityCalculator::new(None).unwrap();
 
