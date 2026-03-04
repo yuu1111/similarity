@@ -31,7 +31,10 @@ func sum(x, y int) int {
     let mut cmd = Command::cargo_bin("similarity-generic").unwrap();
     cmd.arg(file).arg("--language").arg("go").arg("--threshold").arg("0.8");
 
-    cmd.assert().success().stdout(predicate::str::contains("add <-> sum:"));
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("function add"))
+        .stdout(predicate::str::contains("function sum"));
 }
 
 #[test]
@@ -45,7 +48,7 @@ public class Test {
     public int add(int a, int b) {
         return a + b;
     }
-    
+
     public int sum(int x, int y) {
         return x + y;
     }
@@ -56,7 +59,10 @@ public class Test {
     let mut cmd = Command::cargo_bin("similarity-generic").unwrap();
     cmd.arg(file).arg("--language").arg("java").arg("--threshold").arg("0.8");
 
-    cmd.assert().success().stdout(predicate::str::contains("add <-> sum:"));
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("method add"))
+        .stdout(predicate::str::contains("method sum"));
 }
 
 #[test]
@@ -130,7 +136,10 @@ public class Calculator {
     let mut cmd = Command::cargo_bin("similarity-generic").unwrap();
     cmd.arg(file).arg("--language").arg("csharp").arg("--threshold").arg("0.8");
 
-    cmd.assert().success().stdout(predicate::str::contains("Add <-> Sum:"));
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("method Add"))
+        .stdout(predicate::str::contains("method Sum"));
 }
 
 #[test]
@@ -157,7 +166,10 @@ end
     let mut cmd = Command::cargo_bin("similarity-generic").unwrap();
     cmd.arg(file).arg("--language").arg("ruby").arg("--threshold").arg("0.8");
 
-    cmd.assert().success().stdout(predicate::str::contains("calculate_sum <-> compute_total:"));
+    cmd.assert()
+        .success()
+        .stdout(predicate::str::contains("function calculate_sum"))
+        .stdout(predicate::str::contains("function compute_total"));
 }
 
 #[test]
@@ -215,7 +227,7 @@ func third() {}
 
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("Found 3 functions:"))
+        .stdout(predicate::str::contains("3 functions"))
         .stdout(predicate::str::contains("first"))
         .stdout(predicate::str::contains("second"))
         .stdout(predicate::str::contains("third"));
@@ -262,7 +274,7 @@ func add(a, b int) int {
 
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("Found 1 functions:"))
+        .stdout(predicate::str::contains("1 functions"))
         .stdout(predicate::str::contains("add"));
 }
 
@@ -294,8 +306,7 @@ public class Test {
 
     cmd.assert()
         .success()
-        .stdout(predicate::str::contains("Comparing functions for similarity..."))
-        .stdout(predicate::str::contains("add").not());
+        .stdout(predicate::str::contains("No duplicate functions found!"));
 }
 
 #[test]
