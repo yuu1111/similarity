@@ -1,82 +1,85 @@
 # TODO
 
-## Features to Implement
+## 実装予定の機能
 
-### .similarity-ignore Support
-- [ ] Implement `.similarity-ignore` file parsing
-- [ ] Support `:function()` syntax for ignoring specific function names
-- [ ] Support wildcards (`*`) in function patterns
-- [ ] Common patterns to ignore:
-  - Test setup/teardown functions (setUp, tearDown, beforeEach, etc.)
-  - Test helpers (test*, expect*, describe*)
-  - React lifecycle methods
-  - Framework hooks (useEffect, useState, etc.)
-  - Generated code (*Generated, *_pb, *_grpc)
-  - Build tool artifacts (__webpack*, etc.)
-  - Common boilerplate (main, init, constructor)
+### .similarity-ignore サポート
 
-### CLI Improvements
-- [x] Support multiple file/directory arguments with glob expansion
-  - Accept multiple paths: `similarity-ts functions src/ lib/ tests/`
-  - Expand glob patterns in arguments
-  - Respect .gitignore when expanding paths
-  - Use `ignore` crate which already handles .gitignore
+- [ ] `.similarity-ignore` ファイルのパース実装
+- [ ] 特定の関数名を無視する `:function()` 構文のサポート
+- [ ] 関数パターンでのワイルドカード(`*`)サポート
+- [ ] 無視する一般的なパターン:
+  - テストのセットアップ/テアダウン関数 (setUp, tearDown, beforeEach 等)
+  - テストヘルパー (test*, expect*, describe*)
+  - React ライフサイクルメソッド
+  - フレームワークフック (useEffect, useState 等)
+  - 生成コード (*Generated, *_pb, *_grpc)
+  - ビルドツール成果物 (__webpack* 等)
+  - 一般的なボイラープレート (main, init, constructor)
 
-### Performance Improvements
-- [ ] Parallel parsing with configurable concurrency
-  - Add `--threads` or `-j` flag to control parallelism
-  - Use `rayon` for parallel file processing
-  - Parse multiple files concurrently
-  - Benchmark performance improvements
-- [ ] Incremental mode with AST caching
-  - Add `--incremental` flag
-  - Cache parsed ASTs to disk (e.g., `.similarity-ts-cache/`)
-  - Use file modification time to invalidate cache
-  - Store serialized AST or extracted function/type signatures
-  - Consider using `serde` for AST serialization
-- [ ] Share parsed AST between function and type analyzers
-  - Parse each file only once when running both analyzers
-  - Pass parsed AST to both extractors
-  - Reduce redundant parsing overhead
+### CLI 改善
+- [x] 複数ファイル/ディレクトリ引数のglob展開サポート
+  - 複数パスの受け付け: `similarity-ts functions src/ lib/ tests/`
+  - 引数内のglobパターン展開
+  - パス展開時の .gitignore 準拠
+  - .gitignore を処理済みの `ignore` クレートを使用
 
-### Other Improvements
-- [ ] Add support for custom ignore patterns via CLI flags
-- [ ] Add progress bar for large codebases
-- [ ] Support for more languages (JavaScript without TypeScript types)
+### パフォーマンス改善
 
-## Cross-Language Duplicate Detection Plan
+- [ ] 設定可能な並行度での並列パース
+  - `--threads` または `-j` フラグで並列度を制御
+  - `rayon` による並列ファイル処理
+  - 複数ファイルの同時パース
+  - パフォーマンス改善のベンチマーク
+- [ ] ASTキャッシュによるインクリメンタルモード
+  - `--incremental` フラグの追加
+  - パース済みASTのディスクキャッシュ (例: `.similarity-ts-cache/`)
+  - ファイル更新時刻によるキャッシュ無効化
+  - シリアライズされたASTまたは抽出済み関数/型シグネチャの保存
+  - `serde` によるASTシリアライゼーションを検討
+- [ ] 関数アナライザと型アナライザ間でのパース済みAST共有
+  - 両方のアナライザ実行時にファイルごとに1回だけパース
+  - パース済みASTを両方のエクストラクタに渡す
+  - 冗長なパースのオーバーヘッド削減
 
-Currently, we have implemented a Python parser using tree-sitter, but cross-language duplicate detection is not yet implemented.
+### その他の改善
 
-### Implementation Plan
+- [ ] CLIフラグによるカスタム無視パターンのサポート
+- [ ] 大規模コードベース向けプログレスバー
+- [ ] 追加言語のサポート (TypeScript型なしのJavaScript)
 
-1. **AST Normalization**
-   - Convert different language AST structures to a common intermediate representation
-   - Map language-specific syntax to generic structures
-   - Example: Treat Python's `for item in items` and JavaScript's `for (const item of items)` as the same structure
+## クロス言語重複検出計画
 
-2. **Semantic Equivalence Detection**
-   - Array operations: `map`, `filter`, `reduce` and other higher-order functions
-   - Loop structures: Equivalence of for, while, do-while
-   - Conditional branches: Unify if-else, switch-case, ternary operators
+現在、tree-sitterを使用したPythonパーサーを実装済みだが、クロス言語の重複検出は未実装。
 
-3. **Type System Abstraction**
-   - Bridge dynamic typing (Python) and static typing (TypeScript)
-   - Enable comparison regardless of type annotations
+### 実装計画
 
-4. **Implementation Priority**
-   - Phase 1: Basic loop and conditional branch detection
-   - Phase 2: Array and object operation detection
-   - Phase 3: Class and method detection
+1. **AST正規化**
+   - 異なる言語のAST構造を共通中間表現に変換
+   - 言語固有の構文を汎用構造にマッピング
+   - 例: Pythonの `for item in items` とJavaScriptの `for (const item of items)` を同一構造として扱う
 
-### Technical Challenges
+2. **意味的等価性の検出**
+   - 配列操作: `map`, `filter`, `reduce` 等の高階関数
+   - ループ構造: for, while, do-while の等価性
+   - 条件分岐: if-else, switch-case, 三項演算子の統合
 
-- Performance: tree-sitter is about 10x slower than oxc_parser
-- AST structure differences: Different node types and property names per language
-- Semantic differences: Same operations may have different meanings in different languages
+3. **型システムの抽象化**
+   - 動的型付け(Python)と静的型付け(TypeScript)の橋渡し
+   - 型注釈に依存しない比較を実現
 
-### Future Extensions
+4. **実装優先順位**
+   - フェーズ1: 基本的なループと条件分岐の検出
+   - フェーズ2: 配列・オブジェクト操作の検出
+   - フェーズ3: クラスとメソッドの検出
 
-- Support for other languages: Rust, Go, Java, etc.
-- Cross-language refactoring suggestions
-- Automatic code translation features
+### 技術的課題
+
+- パフォーマンス: tree-sitter は oxc_parser より約10倍遅い
+- AST構造の違い: 言語ごとに異なるノード型とプロパティ名
+- 意味的な違い: 同じ操作が異なる言語で異なる意味を持つ場合がある
+
+### 将来の拡張
+
+- 追加言語のサポート: Rust, Go, Java 等
+- クロス言語リファクタリング提案
+- 自動コード翻訳機能

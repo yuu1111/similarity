@@ -5,18 +5,21 @@ First release of similarity-ts (formerly ts-similarity) - a high-performance Typ
 ## 🎯 Features
 
 ### Core Functionality
+
 - **Function Similarity Detection**: Find duplicate or similar functions across your codebase
 - **Type Similarity Detection** (experimental): Detect similar interfaces and type definitions
 - **AST-based Comparison**: Uses Tree Structured Edit Distance (TSED) algorithm for accurate structural comparison
 - **Cross-file Analysis**: Find duplicates across multiple files in your project
 
 ### Performance
+
 - **Bloom Filter Pre-filtering**: ~90% reduction in comparisons with AST fingerprinting
 - **Multi-threaded Processing**: Parallel file parsing and analysis using Rayon
 - **Memory Efficient**: Written in Rust for optimal memory usage
 - **Fast Mode**: Default mode with intelligent pre-filtering
 
 ### Developer Experience
+
 - **Zero Configuration**: Works out of the box with sensible defaults
 - **VSCode-compatible Output**: Click file paths to jump directly to code
 - **Flexible Filtering**:

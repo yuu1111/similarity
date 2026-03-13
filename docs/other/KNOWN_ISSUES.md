@@ -1,19 +1,22 @@
-# Known Issues
+# 既知の問題
 
-## Rust Type Similarity Detection
+## Rust 型類似度検出
 
-### Enum Similarity Detection
-- **Issue**: Enum similarity detection shows lower than expected similarity scores even for structurally identical enums
-- **Example**: Two enums with identical variants show only ~43% similarity
-- **Cause**: The AST structure for enums includes variant names as values, and the current rename_cost parameter doesn't adequately handle this case
-- **Workaround**: Use a lower threshold (0.4-0.5) for enum similarity detection
-- **Status**: Under investigation
+### Enum 類似度検出
 
-### Struct Similarity Detection
-- **Status**: Working as expected
-- Structs with similar field types but different field names correctly show high similarity (90%+)
-- Generic structs are properly compared
+- **問題**: 構造的に同一の enum でも、期待より低い類似度スコアが表示される
+- **例**: 同一のバリアントを持つ2つの enum が約43%の類似度しか示さない
+- **原因**: enum の AST 構造にバリアント名が値として含まれており、現在の rename_cost パラメータでは適切に処理できない
+- **回避策**: enum 類似度検出には低い閾値(0.4-0.5)を使用する
+- **ステータス**: 調査中
 
-## TypeScript Type Similarity Detection
-- **Status**: Working as expected
-- Interfaces, type aliases, and type literals are correctly detected with appropriate similarity scores
+### Struct 類似度検出
+
+- **ステータス**: 正常動作
+- フィールド型が似ていてフィールド名が異なる構造体は、正しく高い類似度(90%以上)を示す
+- ジェネリック構造体も正しく比較される
+
+## TypeScript 型類似度検出
+
+- **ステータス**: 正常動作
+- インターフェース、型エイリアス、型リテラルが適切な類似度スコアで正しく検出される
